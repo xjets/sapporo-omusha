@@ -52,8 +52,18 @@ museum diorama.
 
 ### Gather: the input side
 
-`/gather/` is a separate page for an interviewer recording what older residents of a town know
-about a place or a thing. It is the Envelope's input, kept apart from the Omusha demo record.
+`/gather/` is a separate application for recording what people know about a place or a thing. It is
+the Envelope's input, kept apart from the Omusha demo record and styled differently, because it is
+meant to serve any project, not one museum.
+
+It has two ways in:
+
+- **Tell it myself** (`/gather/?mode=self`, the default): a person at a kiosk, phone or computer is
+  walked through five steps (what it is about, about you and consent, tell, pictures, check) with
+  on-screen questions and topic prompts. They see only what they saved in that sitting, and
+  "start again for the next person" clears the screen.
+- **Interview someone** (`/gather/?mode=interview`): one page for an interviewer, with a ready
+  script of topics and suggested questions that can be asked aloud. Described below.
 
 1. **Envelope**: name it (a keepsake, a room, a building, a village), nest it inside another.
 2. **Who is speaking**: the speaker, their relation to it (their standing), who may see what

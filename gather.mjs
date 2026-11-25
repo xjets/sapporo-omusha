@@ -84,6 +84,8 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
     '- Do not press on painful subjects. If the speaker sounded tired or upset, offer to stop or change subject instead.',
     '- layer: which layer the question serves. why: one short line for the interviewer, in the session language.',
     'If the transcript is empty, return no observations and a gentle opening question about the envelope.',
+    '',
+    'MODE. When mode is "self" there is no interviewer: the person is entering their own memories at a kiosk, phone or computer and reads the question on the screen. Then: address the question to them directly ("you"), one short sentence, plain everyday words, no praise and no summary of what they said; write claims in the third person using their name if given, otherwise "the speaker" (Japanese: 話し手); and make why a short on-screen hint to the person about what kind of detail helps (for example "A year, a season or your age then is enough."), never a note about the record or its layers.',
   ].join('\n');
   const DRAFT_SCHEMA = {
     type: 'OBJECT',
@@ -114,9 +116,10 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
     const input = {
       sessionLanguage: lang === 'ja' ? 'Japanese' : 'English',
       envelope: { name: envelope.name, scale: envelope.scale, place: envelope.place },
+      mode: body.mode === 'self' ? 'self' : 'interviewer',
       speaker: { name: s(body.speaker?.name, 80) || 'the speaker', relation: s(body.speaker?.role, 40) },
       alreadyRecorded: current.slice(-40).map((o) => o.claim),
-      MISSING: list,
+      MISSING: body.mode === 'self' ? list.filter((m) => !m.startsWith('form:')) : list, // self-entry has its own picture step
       lastQuestionAsked: s(body.lastQuestion, 400),
       transcript: s(body.transcript, 12000),
     };
@@ -149,8 +152,11 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
       actors: Array.isArray(o.actors) ? o.actors.map((a) => s(a, 120)).filter(Boolean).slice(0, 12) : [],
       speaker: s(session.speaker, 120) || 'Anonymous',
       protocol: { audience: s(o.audience, 20) || s(session.audience, 20) || 'family' },
-      source: { type: 'testimony', ref: `Interview with ${s(session.speaker, 120) || 'an anonymous speaker'}, ${new Date().toISOString().slice(0, 10)}, recorded by ${s(session.interviewer, 120)}` },
-      author: s(session.interviewer, 120), lang: session.lang === 'ja' ? 'ja' : 'en', status: 'unverified', createdAt: new Date().toISOString(),
+      via: session.mode === 'self' ? 'self' : 'interview',
+      source: { type: 'testimony', ref: session.mode === 'self'
+        ? `Told directly by ${s(session.speaker, 120) || 'an anonymous speaker'}, ${new Date().toISOString().slice(0, 10)}`
+        : `Interview with ${s(session.speaker, 120) || 'an anonymous speaker'}, ${new Date().toISOString().slice(0, 10)}, recorded by ${s(session.interviewer, 120)}` },
+      author: session.mode === 'self' ? (s(session.speaker, 120) || 'Anonymous') : s(session.interviewer, 120), lang: session.lang === 'ja' ? 'ja' : 'en', status: 'unverified', createdAt: new Date().toISOString(),
     };
     if (!out.claim) errors.push('claim');
     for (const [f, list] of [['kind', GATHER_ENUMS.kind], ['stratum', GATHER_ENUMS.stratum], ['evidence', GATHER_ENUMS.evidence]]) if (!list.includes(out[f])) errors.push(f);
@@ -232,7 +238,7 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
       const session = b.session || {};
       if (!(await rows(KEYS.envelopes)).some((e) => e.id === session.envelope)) return sendJson(res, 404, { error: 'Unknown envelope.' });
       if (session.consent !== true) return sendJson(res, 400, { error: 'Record the speaker\'s consent before saving.' });
-      if (!s(session.interviewer, 120)) return sendJson(res, 400, { error: 'Add your own name as the interviewer.' });
+      if (session.mode !== 'self' && !s(session.interviewer, 120)) return sendJson(res, 400, { error: 'Add your own name as the interviewer.' });
       const existing = await rows(KEYS.observations);
       const cleaned = (Array.isArray(b.items) ? b.items : []).slice(0, 60).map((o) => cleanObservation(o, session, existing));
       const bad = cleaned.find((c) => c.errors.length);

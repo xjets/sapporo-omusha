@@ -4,216 +4,326 @@
 <meta charset="utf-8">
 <meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#efe4cc">
-<title>The Envelope · Gather</title>
+<meta name="theme-color" content="#eef1f5">
+<title>Gather</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
 <style>
   :root {
-    --paper: #efe4cc; --paper-2: #e5d6b6; --paper-3: #f7efdc; --ink: #221c16; --soft: #5d5246; --line: rgba(34,28,22,.25);
-    --l-form: #2c4f7c; --l-time: #a8741f; --l-actors: #8f4527; --l-types: #4b7a46; --l-evidence: #634a88;
-    --l-absence: #7a7168; --l-protocol: #221c16; --l-voice: #b5322f; --recorded: #3f7a4a; --symbolic: #6b55a0;
+    --bg: #eef1f5; --card: #ffffff; --tint: #f6f8fa; --ink: #26303b; --soft: #66717e; --line: #dde2e8; --accent: #3f5873; --accent-2: #344a62;
+    /* Each layer: a deep muted tone for text and a pastel for fills */
+    --form: #45618a; --form-b: #dbe5f1; --time: #7a6a2c; --time-b: #ebe6c6; --actors: #94544e; --actors-b: #f1dbd8;
+    --types: #47694b; --types-b: #d9e8da; --evidence: #5f5189; --evidence-b: #e3ddf1; --absence: #5c6570; --absence-b: #e2e5e9;
+    --protocol: #3d4b57; --protocol-b: #d6dee4; --voice: #3b6f6b; --voice-b: #d3e8e5; --rec: #c2675b;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; color: var(--ink); background: var(--paper-2); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif; }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 16px 16px 80px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
-  h1, h2, .mincho { font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif; }
-  header.top { display: flex; align-items: flex-start; gap: 12px; }
-  header.top h1 { margin: 0; font-size: 24px; font-weight: 800; line-height: 1.25; }
-  header.top p { margin: 2px 0 0; color: var(--soft); font-size: 13px; }
-  header.top .sp { flex: 1; min-width: 0; }
-  .card { background: var(--paper); border: 2.5px solid var(--ink); border-radius: 4px; padding: 16px;
-    box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px var(--ink), 5px 6px 0 rgba(0,0,0,.35); display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
-  .card > h2 { margin: 0; font-size: 17px; display: flex; align-items: center; gap: 8px; color: var(--lc, var(--ink)); }
-  .card > h2::after { content: ""; flex: 1; border-top: 2px solid currentColor; opacity: .5; }
-  .card > h2 small { font: 12px system-ui, sans-serif; color: var(--soft); }
-  .seal { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 2px; color: var(--paper-3); background: var(--lc, var(--ink));
-    font: 800 14px/1 "Shippori Mincho B1", serif; flex: none; }
-  [data-layer=form] { --lc: var(--l-form); } [data-layer=time] { --lc: var(--l-time); } [data-layer=actors] { --lc: var(--l-actors); }
-  [data-layer=types] { --lc: var(--l-types); } [data-layer=evidence] { --lc: var(--l-evidence); } [data-layer=absence] { --lc: var(--l-absence); }
-  [data-layer=protocol] { --lc: var(--l-protocol); } [data-layer=voice] { --lc: var(--l-voice); }
-  button, .btn { font: inherit; font-size: 14px; cursor: pointer; color: var(--ink); background: var(--paper-3); border: 2px solid var(--ink); border-radius: 3px;
-    padding: 7px 12px; box-shadow: 2px 2px 0 var(--ink); display: inline-flex; align-items: center; gap: 6px; min-height: 38px; }
-  button:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+  body { margin: 0; color: var(--ink); background: var(--bg); font: 15px/1.6 "Nunito", "Zen Maru Gothic", "Hiragino Maru Gothic ProN", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  body[data-mode=self] { font-size: 17px; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 16px 16px 120px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  body[data-mode=self] .wrap { max-width: 680px; }
+  h1, h2, h3 { font-weight: 800; letter-spacing: -.01em; }
+  header.top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  header.top .brand { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 180px; }
+  header.top .mark { width: 40px; height: 40px; border-radius: 13px; background: var(--voice-b); color: var(--voice); display: grid; place-items: center; font: 700 20px "Zen Maru Gothic", sans-serif; flex: none; }
+  header.top h1 { margin: 0; font-size: 21px; line-height: 1.2; }
+  header.top p { margin: 0; color: var(--soft); font-size: 13px; line-height: 1.35; }
+  .seg { display: inline-flex; background: #e2e7ed; border-radius: 12px; padding: 3px; }
+  @media (max-width: 600px) { .seg { order: 3; width: 100%; } .seg button { flex: 1; } }
+  .seg button { border: 0; background: transparent; box-shadow: none; min-height: 34px; padding: 4px 12px; font-size: 13px; font-weight: 700; color: var(--soft); border-radius: 10px; }
+  .seg button[aria-pressed=true] { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(30,45,60,.15); }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 20px; box-shadow: 0 1px 2px rgba(30,45,60,.04), 0 10px 28px rgba(30,45,60,.05);
+    display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+  .card > h2 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  body[data-mode=self] .card > h2 { font-size: 22px; }
+  .card > h2 small { font-size: 13px; font-weight: 600; color: var(--soft); }
+  .seal { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; color: var(--lc, var(--accent)); background: var(--lb, #e2e7ed);
+    font: 700 16px/1 "Zen Maru Gothic", sans-serif; flex: none; }
+  [data-layer=form] { --lc: var(--form); --lb: var(--form-b); } [data-layer=time] { --lc: var(--time); --lb: var(--time-b); }
+  [data-layer=actors] { --lc: var(--actors); --lb: var(--actors-b); } [data-layer=types] { --lc: var(--types); --lb: var(--types-b); }
+  [data-layer=evidence] { --lc: var(--evidence); --lb: var(--evidence-b); } [data-layer=absence] { --lc: var(--absence); --lb: var(--absence-b); }
+  [data-layer=protocol] { --lc: var(--protocol); --lb: var(--protocol-b); } [data-layer=voice] { --lc: var(--voice); --lb: var(--voice-b); }
+
+  button, .btn { font: inherit; font-size: .95em; font-weight: 700; cursor: pointer; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 8px 14px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 42px; transition: background .12s, transform .08s; }
+  body[data-mode=self] button { min-height: 50px; padding: 10px 18px; }
+  button:hover { background: var(--tint); } button:active { transform: scale(.98); }
   button:disabled { opacity: .45; cursor: default; }
-  button.primary { background: var(--l-voice); color: var(--paper-3); font-weight: 700; }
-  button.quiet { box-shadow: none; border-width: 1.5px; min-height: 30px; padding: 3px 9px; font-size: 13px; }
-  button.link { all: unset; cursor: pointer; color: var(--l-form); text-decoration: underline; font-size: 13px; }
-  input, select, textarea { font: inherit; font-size: 15px; color: var(--ink); background: #fbf6ea; border: 1.5px solid var(--ink); border-radius: 3px; padding: 7px 9px; width: 100%; min-width: 0; }
-  textarea { resize: vertical; line-height: 1.6; }
-  label.f { display: grid; gap: 3px; font-size: 12px; color: var(--soft); min-width: 0; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
-  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .muted { color: var(--soft); font-size: 13px; }
-  .check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; } .check input { width: 20px; height: 20px; flex: none; margin-top: 2px; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; } button.primary:hover { background: var(--accent-2); }
+  button.quiet { min-height: 34px !important; padding: 4px 11px !important; font-size: .85em; font-weight: 600; }
+  button.link { all: unset; cursor: pointer; color: var(--form); text-decoration: underline; font-size: .87em; font-weight: 600; }
+  button svg, .mic svg { width: 1.15em; height: 1.15em; flex: none; }
+  input, select, textarea { font: inherit; color: var(--ink); background: var(--tint); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; width: 100%; min-width: 0; }
+  input:focus, select:focus, textarea:focus, button:focus-visible { outline: 3px solid var(--form-b); outline-offset: 1px; border-color: var(--form); }
+  textarea { resize: vertical; line-height: 1.65; }
+  .f { display: grid; gap: 5px; font-size: .84em; font-weight: 600; color: var(--soft); min-width: 0; align-content: start; }
+  .f > input, .f > select, .f > textarea { font-size: 1.19em; font-weight: 400; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  body[data-mode=self] .grid { grid-template-columns: minmax(0, 1fr); }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .muted { color: var(--soft); font-size: .87em; }
+  .check { display: flex; gap: 10px; align-items: flex-start; background: var(--protocol-b); color: var(--protocol); border-radius: 14px; padding: 12px 14px; font-weight: 600; }
+  .check input { width: 22px; height: 22px; flex: none; margin-top: 2px; accent-color: var(--accent); }
+  .check.small { background: none; padding: 0; font-size: .87em; color: var(--soft); align-items: center; } .check.small input { width: 17px; height: 17px; margin: 0; }
   .hidden { display: none !important; }
-  button.lang { padding: 4px 8px; } .flag { width: 30px; height: 20px; border-radius: 2px; display: none; box-shadow: 0 0 0 1px rgba(0,0,0,.4); } .flag.on { display: block; }
+  body[data-mode=self] .iv-only, body[data-mode=interviewer] .self-only { display: none !important; }
+  body[data-mode=self] .step:not(.active) { display: none; }
+  button.lang { padding: 5px 9px; min-height: 40px !important; } .flag { width: 28px; height: 19px; border-radius: 4px; display: none; box-shadow: 0 0 0 1px rgba(30,45,60,.2); } .flag.on { display: block; }
+
+  /* Choice pills stand in for dropdowns in self-entry */
+  .pick { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { border-radius: 999px; font-weight: 600; font-size: 1.1em; }
+  .pill[aria-pressed=true] { background: var(--lb, var(--form-b)); border-color: var(--lc, var(--form)); color: var(--lc, var(--form)); font-weight: 700; }
+  body[data-mode=self] select.mirrored, body[data-mode=interviewer] .pick { display: none; }
+
+  /* Steps (self-entry) */
+  .progress { display: grid; gap: 6px; } .progress .bar { height: 8px; border-radius: 99px; background: #e0e5eb; overflow: hidden; }
+  .progress .bar i { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--voice); opacity: .7; transition: width .25s; }
+  .progress span { font-size: .8em; font-weight: 700; color: var(--soft); }
+  .welcome h2 { font-size: 30px !important; line-height: 1.25; } .welcome p { margin: 0; }
+  .how { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; } .how li { display: flex; gap: 12px; align-items: center; background: var(--tint); border-radius: 14px; padding: 10px 12px; }
+  .foot { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,.92); backdrop-filter: blur(10px); border-top: 1px solid var(--line); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); z-index: 5; }
+  .foot > div { max-width: 648px; margin: 0 auto; display: flex; gap: 10px; } .foot .primary { flex: 1; font-size: 1.05em; }
 
   /* Layer coverage */
-  .cover { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 6px; }
-  .cover div { border: 1.5px solid var(--lc); border-radius: 3px; padding: 6px; display: grid; gap: 2px; justify-items: center; text-align: center; font-size: 11px; color: var(--soft); background: var(--paper-3); }
-  .cover div.empty { border-style: dashed; opacity: .6; } .cover div.empty .seal { background: transparent; color: var(--lc); box-shadow: inset 0 0 0 1.5px var(--lc); }
-  .cover b { font-size: 12px; color: var(--lc); }
+  .cover { display: grid; grid-template-columns: repeat(auto-fit, minmax(94px, 1fr)); gap: 8px; }
+  .cover div { border-radius: 14px; padding: 8px 6px; display: grid; gap: 2px; justify-items: center; text-align: center; font-size: 11.5px; color: var(--lc); background: var(--lb); }
+  .cover div.empty { background: var(--tint); color: var(--soft); box-shadow: inset 0 0 0 1px var(--line); } .cover div.empty .seal { background: var(--card); box-shadow: inset 0 0 0 1px var(--line); }
+  .cover .seal { background: rgba(255,255,255,.7); } .cover b { font-size: 12px; }
 
   /* Voice loop */
-  .ask { border: 2px solid var(--l-voice); border-left-width: 6px; border-radius: 3px; background: var(--paper-3); padding: 10px 12px; display: grid; gap: 6px; }
-  .ask .q { font: 700 18px/1.5 "Shippori Mincho B1", serif; }
-  .mic { width: 76px; height: 76px; border-radius: 50%; justify-content: center; font-size: 30px; background: var(--paper-3); }
-  .mic[aria-pressed=true] { background: var(--l-voice); color: #fff; animation: pulse 1.2s infinite; }
-  @keyframes pulse { 50% { box-shadow: 0 0 0 10px rgba(181,50,47,.2); } }
-  .draft, .obs { border: 1.5px solid var(--ink); border-left: 5px solid var(--l-time); border-radius: 0 3px 3px 0; background: var(--paper-3); padding: 10px; display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr); }
-  .draft.off { opacity: .45; } .draft.absence, .obs.absence { border-left-color: var(--l-absence); background: repeating-linear-gradient(-45deg, rgba(122,113,104,.12) 0 2px, transparent 2px 7px), var(--paper-3); }
-  .quote { font-size: 13px; color: var(--soft); border-left: 2px solid var(--line); padding-left: 8px; font-style: italic; overflow-wrap: anywhere; }
-  .chips { display: flex; gap: 5px; flex-wrap: wrap; } .chip { font-size: 11px; padding: 1px 7px; border-radius: 2px; border: 1.5px solid var(--c, var(--soft)); color: var(--c, var(--soft)); background: var(--paper-3); }
-  .chip.solid { background: var(--c); color: var(--paper-3); }
-  .stratum { font: 700 13px "Shippori Mincho B1", serif; color: var(--l-time); letter-spacing: .05em; margin-top: 4px; }
+  .ask { border-radius: 16px; background: var(--lb, var(--voice-b)); padding: 14px 16px; display: grid; gap: 8px; }
+  .ask .eyebrow { font-size: .78em; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--lc, var(--voice)); }
+  .ask .q { font-weight: 700; font-size: 1.3em; line-height: 1.45; } .ask .muted { color: var(--lc, var(--voice)); }
+  .ask button { background: rgba(255,255,255,.75); border-color: transparent; }
+  .clues { display: flex; flex-wrap: wrap; gap: 7px; }
+  .clue { min-height: 36px !important; padding: 4px 12px !important; border-radius: 999px; font-size: .85em; font-weight: 700; color: var(--lc); background: var(--card); border-color: var(--lb); }
+  .clue.done { background: var(--lb); } .clue.done::before { content: "✓"; }
+  .mic { width: 84px; height: 84px; min-height: 84px !important; padding: 0 !important; border-radius: 50%; background: var(--voice-b); border-color: transparent; color: var(--voice); font-size: 30px; }
+  .mic:hover { background: #c5dfdb; }
+  .mic[aria-pressed=true] { background: var(--rec); color: #fff; animation: pulse 1.3s infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 12px rgba(194,103,91,.18); } }
+  .draft, .obs { border-radius: 16px; background: var(--tint); border: 1px solid var(--line); border-left: 6px solid var(--time-b); padding: 12px 14px; display: grid; gap: 9px; grid-template-columns: minmax(0, 1fr); }
+  .draft textarea { background: var(--card); font-size: 1.05em; }
+  .draft.off { opacity: .45; } .draft.absence, .obs.absence { border-left-color: var(--absence-b); border-style: dashed; border-left-style: solid; }
+  .draft details summary { cursor: pointer; font-size: .85em; font-weight: 700; color: var(--soft); } .draft details .grid { margin-top: 10px; }
+  .quote { font-size: .87em; color: var(--soft); border-left: 3px solid var(--line); padding-left: 10px; overflow-wrap: anywhere; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; } .chip { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; color: var(--lc, var(--soft)); background: var(--card); box-shadow: inset 0 0 0 1px var(--lb, var(--line)); }
+  .chip.solid { background: var(--lb); box-shadow: none; }
+  .stratum { font-weight: 800; font-size: .82em; color: var(--time); letter-spacing: .06em; text-transform: uppercase; margin-top: 6px; }
+  .thanks { background: var(--types-b); color: var(--types); border-radius: 16px; padding: 16px; font-weight: 700; font-size: 1.1em; }
 
   /* Form uploads */
   .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
-  .tile { border: 2px dashed var(--l-form); border-radius: 3px; background: rgba(44,79,124,.05); padding: 12px; display: grid; gap: 6px; cursor: pointer; }
-  .tile b { color: var(--l-form); } .tile input { display: none; } .tile small { color: var(--soft); font-size: 12px; }
-  .basis { font-size: 11px; font-weight: 700; } .basis.recorded { color: var(--recorded); } .basis.symbolic { color: var(--symbolic); }
-  .forms { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
-  .formitem { border: 1.5px solid var(--ink); border-radius: 3px; background: var(--paper-3); padding: 6px; font-size: 12px; display: grid; gap: 4px; overflow-wrap: anywhere; }
-  .formitem img { width: 100%; height: 96px; object-fit: cover; border-radius: 2px; }
-  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: var(--paper-3); padding: 8px 14px; border-radius: 3px; font-size: 14px; display: none; z-index: 9; max-width: calc(100vw - 32px); }
+  .tile { border: 1.5px dashed #b9c8dc; border-radius: 16px; background: #f3f6fa; padding: 14px; display: grid; gap: 4px; cursor: pointer; transition: background .12s; }
+  .tile:hover { background: var(--form-b); } .tile b { color: var(--form); } .tile input { display: none; } .tile small { color: var(--soft); font-size: .8em; }
+  .basis { font-size: 11.5px; font-weight: 800; justify-self: start; padding: 1px 9px; border-radius: 999px; } .basis.recorded { color: var(--types); background: var(--types-b); } .basis.symbolic { color: var(--evidence); background: var(--evidence-b); }
+  .forms { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .formitem { border: 1px solid var(--line); border-radius: 14px; background: var(--tint); padding: 8px; font-size: 12.5px; display: grid; gap: 4px; overflow-wrap: anywhere; }
+  .formitem img { width: 100%; height: 100px; object-fit: cover; border-radius: 9px; }
+  .toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 14px; font-weight: 600; display: none; z-index: 9; max-width: calc(100vw - 32px); }
   .toast.on { display: block; }
 </style>
 </head>
-<body>
+<body data-mode="self">
 <div class="wrap">
   <header class="top">
-    <div class="sp"><h1 data-t="title">The Envelope · Gather</h1><p data-t="subtitle">Record what someone knows about a place or a thing, one observation at a time.</p></div>
+    <div class="brand"><span class="mark">聞</span><div><h1 data-t="title">Gather</h1><p data-t="subtitle"></p></div></div>
+    <div class="seg" role="group"><button id="modeSelf" data-t="modeSelf">Tell it myself</button><button id="modeIv" data-t="modeIv">Interview someone</button></div>
     <button id="lang" class="lang" aria-label="Language / 言語">
       <svg class="flag" data-l="en" viewBox="0 0 60 30"><clipPath id="s"><path d="M0,0v30h60V0z"/></clipPath><clipPath id="q"><path d="M30,15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#s)"><path d="M0,0v30h60V0z" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" clip-path="url(#q)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></g></svg>
       <svg class="flag" data-l="ja" viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#BC002D"/></svg>
     </button>
   </header>
 
+  <div class="progress self-only" id="progress"><span id="progText"></span><div class="bar"><i id="progBar"></i></div></div>
+
+  <!-- 0. Welcome (self-entry) -->
+  <section class="card step welcome self-only" data-step="0">
+    <h2 data-t="wTitle">Tell us what you know</h2>
+    <p data-t="wBody"></p>
+    <ul class="how">
+      <li data-layer="form"><span class="seal">一</span><span data-t="w1"></span></li>
+      <li data-layer="voice"><span class="seal">二</span><span data-t="w2"></span></li>
+      <li data-layer="types"><span class="seal">三</span><span data-t="w3"></span></li>
+      <li data-layer="protocol"><span class="seal">四</span><span data-t="w4"></span></li>
+    </ul>
+  </section>
+
   <!-- 1. Envelope -->
-  <section class="card">
-    <h2><span class="seal">一</span><span data-t="hEnvelope">The envelope</span><small data-t="hEnvelopeSub">the place or thing that holds the memory</small></h2>
-    <div class="row"><select id="envSelect" style="flex:1;min-width:200px"></select><button id="envNewBtn" data-t="newEnvelope">New envelope</button></div>
-    <form id="envForm" class="hidden" style="display:grid;gap:10px">
+  <section class="card step" data-step="1" data-layer="form">
+    <h2><span class="seal">形</span><span data-t="hEnvelope">The envelope</span><small data-t="hEnvelopeSub"></small></h2>
+    <div class="row" id="envPick"><div class="f" style="flex:1;min-width:200px"><span class="self-only" data-t="orExisting"></span><select id="envSelect"></select></div><button id="envNewBtn" class="iv-only" data-t="newEnvelope">New envelope</button></div>
+    <form id="envForm" class="hidden" style="display:grid;gap:12px">
       <div class="grid">
-        <label class="f"><span data-t="fName">Name</span><input id="eName" required data-ph="phName"></label>
-        <label class="f"><span data-t="fScale">What it is</span><select id="eScale"></select></label>
+        <label class="f"><span data-t="fName">Name</span><input id="eName" data-ph="phName"></label>
+        <div class="f"><span data-t="fScale">What it is</span><select id="eScale" data-pick></select></div>
         <label class="f"><span data-t="fPlace">Town or place</span><input id="ePlace" data-ph="phPlace"></label>
-        <label class="f"><span data-t="fParent">Sits inside (optional)</span><select id="eParent"></select></label>
-        <label class="f"><span data-t="fAudience">Who may see it, by default</span><select id="eAudience"></select></label>
+        <label class="f iv-only"><span data-t="fParent">Sits inside (optional)</span><select id="eParent"></select></label>
+        <label class="f iv-only"><span data-t="fAudience">Who may see it, by default</span><select id="eAudience"></select></label>
       </div>
-      <div class="row"><button class="primary" data-t="create">Create</button><button type="button" id="envCancel" data-t="cancel">Cancel</button></div>
+      <div class="row iv-only"><button class="primary" data-t="create">Create</button><button type="button" id="envCancel" data-t="cancel">Cancel</button></div>
     </form>
-    <div id="crumb" class="muted"></div>
-    <div class="cover" id="cover"></div>
+    <div id="crumb" class="muted iv-only"></div>
+    <div class="cover iv-only" id="cover"></div>
   </section>
 
   <div id="work" class="hidden" style="display:grid;gap:16px;grid-template-columns:minmax(0,1fr)">
-  <!-- 2. Session: actors, standing, protocol -->
-  <section class="card" data-layer="actors">
+  <!-- 2. Who is speaking: actors, standing, protocol -->
+  <section class="card step" data-step="2" data-layer="actors">
     <h2><span class="seal">人</span><span data-t="hSession">Who is speaking</span></h2>
     <div class="grid">
-      <label class="f"><span data-t="fInterviewer">Your name (interviewer)</span><input id="sInterviewer"></label>
-      <label class="f"><span data-t="fSpeaker">Speaker's name (or leave blank)</span><input id="sSpeaker"></label>
-      <label class="f"><span data-t="fRole">Their relation to it</span><select id="sRole"></select></label>
-      <label class="f"><span data-t="fGranted">Standing recognised by (optional)</span><input id="sGranted" data-ph="phGranted"></label>
-      <label class="f"><span data-t="fSessionAudience">Who may see what they say</span><select id="sAudience"></select></label>
+      <label class="f iv-only"><span data-t="fInterviewer">Your name (interviewer)</span><input id="sInterviewer"></label>
+      <label class="f"><span data-t="fSpeaker">Speaker's name (or leave blank)</span><input id="sSpeaker" autocomplete="off"></label>
+      <div class="f"><span data-t="fRole">Their relation to it</span><select id="sRole" data-pick></select></div>
+      <label class="f iv-only"><span data-t="fGranted">Standing recognised by (optional)</span><input id="sGranted" data-ph="phGranted"></label>
+      <div class="f" data-layer="protocol"><span data-t="fSessionAudience">Who may see what they say</span><select id="sAudience" data-pick></select></div>
     </div>
-    <label class="check"><input type="checkbox" id="sConsent"><span data-t="consent">The speaker has agreed to be recorded, to the audience chosen above, and knows they can ask for anything to be left out.</span></label>
-    <div class="muted" data-t="privacy">Audio is sent to ElevenLabs for transcription and is not kept. Text is sent to Gemini to sort it into observations. Nothing is saved until you press Save.</div>
+    <label class="check"><input type="checkbox" id="sConsent"><span data-t="consent"></span></label>
+    <div class="muted" data-t="privacy"></div>
   </section>
 
-  <!-- 3. Voice loop -->
-  <section class="card" data-layer="voice">
+  <!-- 3. Tell -->
+  <section class="card step" data-step="3" data-layer="voice">
     <h2><span class="seal">声</span><span data-t="hTalk">Listen and ask</span></h2>
     <div class="ask" id="askBox">
-      <div class="muted" data-t="askNext">Ask next</div>
-      <div class="q" id="askQ" data-t="askEmpty">Press “Suggest a question” to begin, or just start recording.</div>
+      <div class="eyebrow" data-t="askNext">Ask next</div>
+      <div class="q" id="askQ" data-t="askEmpty"></div>
       <div class="muted" id="askWhy"></div>
-      <div class="row"><button id="askPlay" class="quiet" disabled>🔊 <span data-t="playQ">Ask aloud</span></button><button id="askNew" class="quiet" data-t="suggest">Suggest a question</button>
-        <label class="check" style="font-size:13px"><input type="checkbox" id="askAuto" checked style="width:16px;height:16px"><span data-t="autoAsk">ask aloud automatically</span></label></div>
+      <div class="row"><button id="askPlay" class="quiet" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg><span data-t="playQ">Ask aloud</span></button><button id="askNew" class="quiet" data-t="suggest">Suggest a question</button>
+        <label class="check small"><input type="checkbox" id="askAuto"><span data-t="autoAsk">ask aloud automatically</span></label></div>
     </div>
-    <div class="row" style="align-items:center">
-      <button class="mic" id="mic" aria-pressed="false" title="Record">🎙</button>
-      <div style="flex:1;min-width:0"><div id="micState" class="muted" data-t="micIdle">Tap to record their answer. Tap again to stop.</div></div>
+    <div class="f"><span data-t="cluesTitle"></span><div class="clues" id="clues"></div></div>
+    <div class="row" style="align-items:center;gap:16px">
+      <button class="mic" id="mic" aria-pressed="false" aria-label="Record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+      <div style="flex:1;min-width:0"><div id="micState" style="font-weight:600" data-t="micIdle"></div><div class="muted" id="noted"></div></div>
     </div>
-    <label class="f"><span data-t="fTranscript">What they said (you can correct or type here)</span><textarea id="transcript" rows="5"></textarea></label>
+    <label class="f"><span data-t="fTranscript"></span><textarea id="transcript" rows="5"></textarea></label>
     <div class="row"><button class="primary" id="extract" data-t="extract">Sort into observations</button><span class="muted" id="extractState"></span></div>
-    <div id="drafts" style="display:grid;gap:10px"></div>
-    <div class="row hidden" id="saveRow"><button class="primary" id="save"></button><span class="muted" data-t="saveNote">Nothing is overwritten: each save adds to the record.</span></div>
   </section>
 
   <!-- 4. Form -->
-  <section class="card" data-layer="form">
-    <h2><span class="seal">形</span><span data-t="hForm">Form</span><small data-t="hFormSub">how it can be seen</small></h2>
+  <section class="card step" data-step="4" data-layer="form">
+    <h2><span class="seal">形</span><span data-t="hForm">Form</span><small data-t="hFormSub"></small></h2>
     <div class="grid">
-      <label class="f"><span data-t="fCaption">Caption for the next upload</span><input id="fCaption"></label>
-      <label class="f"><span data-t="fDate">When it was taken or made</span><input id="fDate" data-ph="phDate"></label>
+      <label class="f"><span data-t="fCaption"></span><input id="fCaption"></label>
+      <label class="f"><span data-t="fDate"></span><input id="fDate" data-ph="phDate"></label>
     </div>
     <div class="tiles" id="tiles"></div>
     <div class="muted" id="upState"></div>
     <div class="forms" id="forms"></div>
   </section>
 
-  <!-- 5. Record -->
-  <section class="card" data-layer="time">
+  <!-- 5. Check before saving -->
+  <section class="card step" data-step="5" data-layer="evidence" id="reviewCard">
+    <h2><span class="seal">証</span><span data-t="hReview">Check before saving</span></h2>
+    <div class="muted" id="reviewNote"></div>
+    <div id="drafts" style="display:grid;gap:12px"></div>
+    <div class="row iv-only hidden" id="saveRow"><button class="primary" id="save"></button><span class="muted" data-t="saveNote"></span></div>
+  </section>
+
+  <!-- 6. Record -->
+  <section class="card step" data-step="6" data-layer="time">
     <h2><span class="seal">時</span><span data-t="hRecord">The record so far</span></h2>
-    <div id="record" style="display:grid;gap:8px"></div>
+    <div class="thanks self-only" data-t="thanks"></div>
+    <div id="record" style="display:grid;gap:10px"></div>
   </section>
   </div>
 </div>
+<div class="foot self-only"><div><button id="navBack"></button><button id="navAlt" class="hidden"></button><button id="navNext" class="primary"></button></div></div>
 <div class="toast" id="toast"></div>
 
 <script type="module">
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
 const api = async (path, opts) => { const r = await fetch(`/api/gather/${path}`, opts); const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || `Failed (${r.status})`); return d; };
-function toast(text) { const t = $("toast"); t.textContent = text; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2600); }
+function toast(text) { const t = $("toast"); t.textContent = text; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 3000); }
 
-// ---------- Language
+// ---------- Words. A key ending _self replaces the plain key when someone is entering their own memories.
 const S = {
   en: {
-    title: "The Envelope · Gather", subtitle: "Record what someone knows about a place or a thing, one observation at a time.",
-    hEnvelope: "The envelope", hEnvelopeSub: "the place or thing that holds the memory", newEnvelope: "New envelope", choose: "Choose an envelope…",
-    fName: "Name", phName: "Grandmother's kimono · The old net shed", fScale: "What it is", fPlace: "Town or place", phPlace: "Yoichi, Hokkaido",
+    title: "Gather", subtitle: "Record what someone knows about a place or a thing.", subtitle_self: "Keep what you know about a place or a thing.",
+    modeSelf: "Tell it myself", modeIv: "Interview someone",
+    wTitle: "Tell us what you know", wBody: "A house, a tool, a festival, a photograph, a street: the things around us hold memories that are lost when nobody writes them down. This takes about ten minutes. You decide who may see it.",
+    w1: "Choose a place or a thing.", w2: "Tell it in your own words. Speak or type.", w3: "Add a photograph if you have one.", w4: "Check everything before it is saved.",
+    stepOf: (n, m, name) => `Step ${n} of ${m} · ${name}`, stepNames: ["", "What is it about?", "About you", "Tell", "Pictures", "Check"],
+    begin: "Begin", next: "Next", back: "Back", doneTelling: "I have finished telling", toCheck: "Next: check it", saveAll: (n) => `Save ${n}`, finish: "Finish", addMore: "Tell more", nextPerson: "Done · start again for the next person",
+    needEnvelope: "Give it a name first, or choose one from the list.",
+    hEnvelope: "The envelope", hEnvelope_self: "What is it about?", hEnvelopeSub: "the place or thing that holds the memory", hEnvelopeSub_self: "the place or thing you want to tell about",
+    newEnvelope: "New envelope", choose: "Choose an envelope…", choose_self: "Choose…", orExisting: "Or add to one that is already here",
+    fName: "Name", fName_self: "What do you call it?", phName: "Grandmother's kimono · The old net shed", fScale: "What it is", fScale_self: "What kind of thing is it?", fPlace: "Town or place", fPlace_self: "Where is it? (town or place)", phPlace: "Yoichi, Hokkaido",
     fParent: "Sits inside (optional)", none: "nothing", fAudience: "Who may see it, by default", create: "Create", cancel: "Cancel",
-    hSession: "Who is speaking", fInterviewer: "Your name (interviewer)", fSpeaker: "Speaker's name (or leave blank)", fRole: "Their relation to it",
-    fGranted: "Standing recognised by (optional)", phGranted: "family, neighbourhood association…", fSessionAudience: "Who may see what they say",
+    hSession: "Who is speaking", hSession_self: "About you", fInterviewer: "Your name (interviewer)", fSpeaker: "Speaker's name (or leave blank)", fSpeaker_self: "Your name (you can leave this blank)",
+    fRole: "Their relation to it", fRole_self: "How do you know about it?", fGranted: "Standing recognised by (optional)", phGranted: "family, neighbourhood association…",
+    fSessionAudience: "Who may see what they say", fSessionAudience_self: "Who may see what you tell?",
     consent: "The speaker has agreed to be recorded, to the audience chosen above, and knows they can ask for anything to be left out.",
+    consent_self: "I agree that what I tell here is kept and shown to the people I chose above. I can leave anything out before it is saved.",
     privacy: "Audio is sent to ElevenLabs for transcription and is not kept. Text is sent to Gemini to sort it into observations. Nothing is saved until you press Save.",
-    hTalk: "Listen and ask", askNext: "Ask next", askEmpty: "Press “Suggest a question” to begin, or just start recording.", playQ: "Ask aloud", suggest: "Suggest a question", autoAsk: "ask aloud automatically",
-    micIdle: "Tap to record their answer. Tap again to stop.", micRec: (s) => `Recording… ${s}s · tap to stop`, micBusy: "Writing it down…", micBlocked: "Microphone blocked. Allow it in the browser, or type below.",
-    fTranscript: "What they said (you can correct or type here)", extract: "Sort into observations", thinking: "Reading…", nothingFound: "No observations found in that. Try a longer answer.",
-    save: (n) => `Save ${n} to the record`, saveNote: "Nothing is overwritten: each save adds to the record.", saved: (n) => `Saved ${n}.`, needConsent: "Tick the consent box first.", needName: "Add your name as interviewer.",
-    keep: "Keep", drop: "Leave out", dKind: "Type", dStratum: "Time", dWhen: "When (their words)", dEvidence: "Evidence", dRole: "Standing", dAudience: "Who may see", dCause: "Unknown because", dNote: "Why",
+    privacy_self: "If you speak, your voice is sent to ElevenLabs to be written down, and is not kept. The text is sent to Gemini to be sorted. Nothing is saved until you press Save at the end.",
+    hTalk: "Listen and ask", hTalk_self: "Tell it in your own words", askNext: "Ask next", askNext_self: "Question", askEmpty: "Press “Suggest a question” to begin, or just start recording.",
+    opening: (n) => `What do you remember about ${n}?`, openingWhy: "Start anywhere. There are no wrong answers.",
+    playQ: "Ask aloud", playQ_self: "Hear it", suggest: "Suggest a question", suggest_self: "A different question", autoAsk: "ask aloud automatically", autoAsk_self: "read questions aloud",
+    cluesTitle: "Script: tap a topic to ask about it", cluesTitle_self: "Things worth telling. Tap one for a question.",
+    clues: { when: ["When", "When was this? A year, a season, or how old you were then."], who: ["Who", "Who was there? Who made it, used it or looked after it?"], use: ["What it was for", "What was it used for, day to day?"],
+      meaning: ["What it meant", "What did it mean to you, or to your family?"], passed: ["How it was passed on", "How did it come to you, and who should have it next?"], lost: ["What is no longer known", "Is there something about it that nobody knows any more, or that nobody ever asked?"] },
+    cluesIv: { when: "When was this? A year, a season, or how old were you then?", who: "Who was there? Who made it, used it or looked after it?", use: "What was it used for, day to day?", meaning: "What did it mean to you, or to your family?", passed: "How did it come to you, and who should have it next?", lost: "Is there something about it that nobody knows any more, or that nobody ever asked?" },
+    micIdle: "Tap to record their answer. Tap again to stop.", micIdle_self: "Tap the microphone and speak. Tap again to stop.", micRec: (s) => `Recording… ${s}s · tap to stop`, micBusy: "Writing it down…", micBlocked: "The microphone is blocked. Allow it in the browser, or type below.",
+    noted: (n) => n ? `${n} thing${n > 1 ? "s" : ""} noted so far` : "",
+    fTranscript: "What they said (you can correct or type here)", fTranscript_self: "Your words appear here. You can also type, or correct them.",
+    extract: "Sort into observations", extract_self: "Next question", thinking: "Reading…", nothingFound: "Nothing to note in that yet. Try saying a little more.",
+    hReview: "Check before saving", hReview_self: "Is this right?", reviewNote: "", reviewNote_self: "This is what was understood from what you told. Correct anything, or leave things out.", reviewEmpty: "Nothing noted yet.", reviewEmpty_self: "Nothing noted yet. Go back and tell a little, or finish if you only added pictures.",
+    save: (n) => `Save ${n} to the record`, saveNote: "Nothing is overwritten: each save adds to the record.", saved: (n) => `Saved ${n}.`, needConsent: "Tick the consent box first.", needConsent_self: "Please tick the box to agree first.", needName: "Add your name as interviewer.",
+    keep: "Keep", drop: "Leave out", details: "Details", dKind: "Type", dStratum: "Time", dWhen: "When (their words)", dWhen_self: "When (your words)", dEvidence: "Evidence", dRole: "Standing", dAudience: "Who may see", dCause: "Unknown because", dNote: "Why",
     replaces: "Corrects an earlier entry; the earlier one stays in the history.", correct: "Correct this", earlier: (n) => `${n} earlier version${n > 1 ? "s" : ""}`,
-    hForm: "Form", hFormSub: "how it can be seen", fCaption: "Caption for the next upload", fDate: "When it was taken or made", phDate: "2026-11 · around 1965",
+    hForm: "Form", hForm_self: "Add a picture", hFormSub: "how it can be seen", hFormSub_self: "if you have one; you can skip this", fCaption: "Caption for the next upload", fCaption_self: "What does the picture show?", fDate: "When it was taken or made", phDate: "2026-11 · around 1965",
     tSplat: "Gaussian splat", tSplatSub: ".sog .spz .ply", tPhoto: "Photographs", tPhotoSub: "one or many; resized, location data removed", tScan: "Scanned mesh", tScanSub: ".glb .obj .stl from a 3D scan",
     tSynth: "Placeholder mesh", tSynthSub: "AI-made stand-in (.glb)", recorded: "Recorded ●●●", symbolic: "Symbolic ●○○", uploading: (n) => `Uploading ${n}…`, uploaded: "Uploaded.",
-    hRecord: "The record so far", emptyRecord: "Nothing recorded yet.", by: "told by", unknown: "Unknown",
+    hRecord: "The record so far", hRecord_self: "Saved", thanks: "Thank you. What you told is now kept.", emptyRecord: "Nothing recorded yet.", emptyRecord_self: "Nothing was saved this time.", by: "told by", unknown: "Unknown",
     cover: { form: "Form", time: "Time", actors: "Actors", types: "Types", evidence: "Evidence · standing", absence: "Absence", protocol: "Protocol", voice: "Voice" },
     coverVoiceReady: "ready", coverVoiceNot: "needs more",
-    v: {},
+    v: { keepsake: "keepsake or object", made: "when it was made", lived: "when it was in use", observed: "since then", present: "now",
+      "later-account": "remembered and told", "physical-trace": "can still be seen", "contemporary-document": "document from the time", inference: "a guess", witness: "saw or lived it",
+      descendant: "family, heard at home", contributor: "heard from others", "never-collected": "nobody asked", lost: "no one left who knows", restricted: "not to be shared widely", team: "project team" },
+    vSelf: { witness: "I saw or lived it", maker: "I made it", descendant: "I heard it in my family", "community-authority": "I speak for our community", contributor: "I heard it from others", passerby: "I only know a little",
+      family: "My family only", community: "My community", team: "The project team", public: "Anyone" },
   },
   ja: {
-    title: "エンベロープ · 聞き書き", subtitle: "場所やものについて、その人が知っていることを一つずつ記録します。",
-    hEnvelope: "エンベロープ", hEnvelopeSub: "記憶を宿す場所・もの", newEnvelope: "新しく作る", choose: "エンベロープを選ぶ…",
-    fName: "名前", phName: "祖母の着物 · 古い網小屋", fScale: "種類", fPlace: "町・場所", phPlace: "北海道余市町",
+    title: "聞き書き", subtitle: "場所やものについて、その人が知っていることを記録します。", subtitle_self: "場所やものについて、あなたが知っていることを残します。",
+    modeSelf: "自分で話す", modeIv: "聞き取りをする",
+    wTitle: "知っていることを聞かせてください", wBody: "家、道具、祭り、写真、通り。身のまわりのものには記憶が宿っていますが、書きとめなければ消えてしまいます。10分ほどで終わります。だれが見てよいかは、あなたが決めます。",
+    w1: "場所か、ものを一つ選びます。", w2: "自分の言葉で話します。声でも、入力でも。", w3: "写真があれば加えます。", w4: "保存する前に、すべて確かめられます。",
+    stepOf: (n, m, name) => `${m}のうち${n} · ${name}`, stepNames: ["", "何についてですか", "あなたについて", "話す", "写真", "確かめる"],
+    begin: "はじめる", next: "次へ", back: "戻る", doneTelling: "話し終えました", toCheck: "次へ：確かめる", saveAll: (n) => `${n}件を保存する`, finish: "終わる", addMore: "もっと話す", nextPerson: "終了 · 次の方のために最初に戻る",
+    needEnvelope: "名前を入れるか、一覧から選んでください。",
+    hEnvelope: "エンベロープ", hEnvelope_self: "何についてですか", hEnvelopeSub: "記憶を宿す場所・もの", hEnvelopeSub_self: "話したい場所・もの",
+    newEnvelope: "新しく作る", choose: "エンベロープを選ぶ…", choose_self: "選ぶ…", orExisting: "または、すでにあるものに加える",
+    fName: "名前", fName_self: "何と呼んでいますか", phName: "祖母の着物 · 古い網小屋", fScale: "種類", fScale_self: "どんなものですか", fPlace: "町・場所", fPlace_self: "どこにありますか（町・場所）", phPlace: "北海道余市町",
     fParent: "含まれる先（任意）", none: "なし", fAudience: "基本の公開範囲", create: "作成", cancel: "やめる",
-    hSession: "話し手", fInterviewer: "あなたの名前（聞き手）", fSpeaker: "話し手の名前（空欄でも可）", fRole: "話し手との関わり",
-    fGranted: "立場を認めている人・団体（任意）", phGranted: "家族、町内会など", fSessionAudience: "話の公開範囲",
+    hSession: "話し手", hSession_self: "あなたについて", fInterviewer: "あなたの名前（聞き手）", fSpeaker: "話し手の名前（空欄でも可）", fSpeaker_self: "お名前（空欄でもかまいません）",
+    fRole: "話し手との関わり", fRole_self: "どのようにして知っていますか", fGranted: "立場を認めている人・団体（任意）", phGranted: "家族、町内会など",
+    fSessionAudience: "話の公開範囲", fSessionAudience_self: "だれが見てよいですか",
     consent: "話し手は、録音されること、上で選んだ公開範囲、そして残したくないことは外せることに同意しています。",
+    consent_self: "ここで話したことが保存され、上で選んだ人たちに見せられることに同意します。保存する前に、残したくないことは外せます。",
     privacy: "音声は文字起こしのためElevenLabsに送られ、保存されません。文章は観察に整理するためGeminiに送られます。「保存」を押すまで何も保存されません。",
-    hTalk: "聞く・たずねる", askNext: "次の質問", askEmpty: "「質問を提案」を押すか、そのまま録音を始めてください。", playQ: "声でたずねる", suggest: "質問を提案", autoAsk: "自動で読み上げる",
-    micIdle: "タップして答えを録音。もう一度タップで停止。", micRec: (s) => `録音中… ${s}秒 · タップで停止`, micBusy: "書き起こしています…", micBlocked: "マイクが使えません。ブラウザで許可するか、下に入力してください。",
-    fTranscript: "話された内容（直したり、入力したりできます）", extract: "観察に整理する", thinking: "読んでいます…", nothingFound: "観察が見つかりませんでした。もう少し長い答えで試してください。",
-    save: (n) => `${n}件を記録に保存`, saveNote: "上書きはされません。保存するたびに記録に加わります。", saved: (n) => `${n}件を保存しました。`, needConsent: "先に同意の欄にチェックを入れてください。", needName: "聞き手の名前を入れてください。",
-    keep: "残す", drop: "外す", dKind: "種類", dStratum: "時", dWhen: "いつ（本人の言葉）", dEvidence: "根拠", dRole: "立場", dAudience: "公開範囲", dCause: "分からない理由", dNote: "わけ",
+    privacy_self: "声で話す場合、音声は文字にするためElevenLabsに送られ、保存されません。文章は整理のためGeminiに送られます。最後に「保存」を押すまで、何も保存されません。",
+    hTalk: "聞く・たずねる", hTalk_self: "自分の言葉で話してください", askNext: "次の質問", askNext_self: "質問", askEmpty: "「質問を提案」を押すか、そのまま録音を始めてください。",
+    opening: (n) => `「${n}」について、覚えていることを聞かせてください。`, openingWhy: "どこからでもかまいません。まちがいはありません。",
+    playQ: "声でたずねる", playQ_self: "声で聞く", suggest: "質問を提案", suggest_self: "別の質問", autoAsk: "自動で読み上げる", autoAsk_self: "質問を読み上げる",
+    cluesTitle: "台本：話題をタップしてたずねる", cluesTitle_self: "話してほしいこと。タップすると質問が出ます。",
+    clues: { when: ["いつ", "それはいつごろのことですか。年、季節、そのころの年齢でもかまいません。"], who: ["だれ", "そこにはだれがいましたか。作った人、使った人、世話をした人は。"], use: ["何に使ったか", "ふだん、何に使われていましたか。"],
+      meaning: ["どんな意味があったか", "あなたやご家族にとって、どんな意味がありましたか。"], passed: ["どう受け継いだか", "どのようにしてあなたのもとに来ましたか。次はだれに渡したいですか。"], lost: ["もう分からないこと", "もうだれも知らないこと、だれにも聞かれなかったことはありますか。"] },
+    micIdle: "タップして答えを録音。もう一度タップで停止。", micIdle_self: "マイクをタップして話してください。もう一度タップで止まります。", micRec: (s) => `録音中… ${s}秒 · タップで停止`, micBusy: "書き起こしています…", micBlocked: "マイクが使えません。ブラウザで許可するか、下に入力してください。",
+    noted: (n) => n ? `これまでに${n}件を書きとめました` : "",
+    fTranscript: "話された内容（直したり、入力したりできます）", fTranscript_self: "話した言葉がここに出ます。入力したり、直したりもできます。",
+    extract: "観察に整理する", extract_self: "次の質問へ", thinking: "読んでいます…", nothingFound: "まだ書きとめることが見つかりません。もう少し話してみてください。",
+    hReview: "保存前の確認", hReview_self: "これで合っていますか", reviewNote: "", reviewNote_self: "お話から、このように受け取りました。直したり、外したりできます。", reviewEmpty: "まだ何もありません。", reviewEmpty_self: "まだ何もありません。戻って少し話すか、写真だけなら「終わる」を押してください。",
+    save: (n) => `${n}件を記録に保存`, saveNote: "上書きはされません。保存するたびに記録に加わります。", saved: (n) => `${n}件を保存しました。`, needConsent: "先に同意の欄にチェックを入れてください。", needConsent_self: "先に同意の欄にチェックを入れてください。", needName: "聞き手の名前を入れてください。",
+    keep: "残す", drop: "外す", details: "くわしく", dKind: "種類", dStratum: "時", dWhen: "いつ（本人の言葉）", dWhen_self: "いつ（あなたの言葉）", dEvidence: "根拠", dRole: "立場", dAudience: "公開範囲", dCause: "分からない理由", dNote: "わけ",
     replaces: "以前の記録を訂正します。元の記録は履歴に残ります。", correct: "訂正する", earlier: (n) => `以前の版 ${n}件`,
-    hForm: "形態", hFormSub: "どのように見られるか", fCaption: "次のアップロードの説明", fDate: "撮影・制作の時期", phDate: "2026年11月 · 1965年頃",
+    hForm: "形態", hForm_self: "写真を加える", hFormSub: "どのように見られるか", hFormSub_self: "あれば。とばしてもかまいません", fCaption: "次のアップロードの説明", fCaption_self: "何が写っていますか", fDate: "撮影・制作の時期", phDate: "2026年11月 · 1965年頃",
     tSplat: "ガウシアンスプラット", tSplatSub: ".sog .spz .ply", tPhoto: "写真", tPhotoSub: "複数可。縮小し、位置情報を除きます", tScan: "スキャンしたメッシュ", tScanSub: "3Dスキャンの .glb .obj .stl",
     tSynth: "仮のメッシュ", tSynthSub: "AIで作った代役（.glb）", recorded: "実写 ●●●", symbolic: "象徴 ●○○", uploading: (n) => `${n} をアップロード中…`, uploaded: "アップロードしました。",
-    hRecord: "これまでの記録", emptyRecord: "まだ記録はありません。", by: "話し手：", unknown: "不明",
+    hRecord: "これまでの記録", hRecord_self: "保存しました", thanks: "ありがとうございました。お話は大切に残されます。", emptyRecord: "まだ記録はありません。", emptyRecord_self: "今回は何も保存されませんでした。", by: "話し手：", unknown: "不明",
     cover: { form: "形態", time: "時", actors: "人物", types: "種類", evidence: "根拠・立場", absence: "欠落", protocol: "公開の決まり", voice: "声" },
     coverVoiceReady: "準備よし", coverVoiceNot: "もう少し",
     v: {
@@ -225,41 +335,70 @@ const S = {
       "never-collected": "聞かれなかった", destroyed: "壊された・捨てられた", suppressed: "やめさせられた", restricted: "広めない", lost: "知る人がいない",
       family: "家族", community: "地域", team: "聞き手チーム", public: "一般",
     },
+    vSelf: { witness: "自分で見た・経験した", maker: "自分で作った", descendant: "家族から聞いた", "community-authority": "地域を代表して話す", contributor: "人から聞いた", passerby: "少し知っている",
+      family: "家族だけ", community: "地域の人", team: "プロジェクトの担当者", public: "だれでも" },
   },
 };
-const EN_V = { keepsake: "keepsake or object", made: "when it was made", lived: "when it was in use", observed: "since then", present: "now",
-  "later-account": "remembered and told", "physical-trace": "can still be seen", "contemporary-document": "document from the time", inference: "a guess", witness: "saw or lived it",
-  descendant: "family, heard at home", contributor: "heard from others", "never-collected": "nobody asked", lost: "no one left who knows", restricted: "not to be shared widely", team: "project team" };
-let LANG = new URLSearchParams(location.search).get("lang");
-try { LANG = LANG || localStorage.getItem("gather.lang"); } catch {}
+const params = new URLSearchParams(location.search);
+const stored = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+const store = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+let LANG = params.get("lang") || stored("gather.lang");
 if (LANG !== "ja" && LANG !== "en") LANG = navigator.language?.startsWith("ja") ? "ja" : "en";
-const t = (k) => S[LANG][k];
-const label = (v) => (LANG === "ja" ? S.ja.v[v] : EN_V[v]) || String(v || "").replace(/-/g, " ");
+let MODE = params.get("mode") || stored("gather.mode");
+MODE = /^interview/.test(MODE || "") ? "interviewer" : "self";
+const self = () => MODE === "self";
+const t = (k) => (self() ? S[LANG][`${k}_self`] : undefined) ?? S[LANG][k];
+const label = (v) => S[LANG].v[v] || String(v || "").replace(/-/g, " ");
+const selfLabel = (v) => (self() && S[LANG].vSelf[v]) || label(v);
 
 // ---------- State
-let ENUMS = null, envelopes = [], env = null, observations = [], forms = [], drafts = [], lastQuestion = "";
-const remember = (id) => { const n = $(id); try { n.value = localStorage.getItem(`gather.${id}`) || n.value; } catch {} n.addEventListener("change", () => { try { localStorage.setItem(`gather.${id}`, n.value); } catch {} }); };
+let ENUMS = null, envelopes = [], env = null, observations = [], forms = [], drafts = [], lastQuestion = "", STEP = 0, sittingStart = new Date().toISOString();
+const LAST = 6;
+const remember = (id) => { const n = $(id); n.value = stored(`gather.${id}`) || n.value; n.addEventListener("change", () => store(`gather.${id}`, n.value)); };
+const who = () => (self() ? $("sSpeaker").value : $("sInterviewer").value).trim();
 
-function fillSelect(sel, values, value) { sel.innerHTML = ""; for (const v of values) { const o = el("option", "", label(v)); o.value = v; if (v === value) o.selected = true; sel.append(o); } }
+function mirror(sel) { // pills that stand in for a dropdown in self-entry
+  let box = sel.nextElementSibling;
+  if (!box?.classList.contains("pick")) { box = el("div", "pick"); sel.after(box); sel.classList.add("mirrored"); }
+  box.innerHTML = "";
+  for (const o of sel.options) {
+    const b = el("button", "pill", o.textContent); b.type = "button"; b.setAttribute("aria-pressed", String(o.selected));
+    b.addEventListener("click", () => { sel.value = o.value; sel.dispatchEvent(new Event("change")); mirror(sel); });
+    box.append(b);
+  }
+}
+function fillSelect(sel, values, value, lab = label) {
+  sel.innerHTML = "";
+  for (const v of values) { const o = el("option", "", lab(v)); o.value = v; if (v === value) o.selected = true; sel.append(o); }
+  if (sel.hasAttribute("data-pick")) mirror(sel);
+}
+const setVal = (sel, v) => { sel.value = v; if (sel.hasAttribute("data-pick")) mirror(sel); };
+
 function applyLang() {
-  document.documentElement.lang = LANG;
+  document.documentElement.lang = LANG; document.body.dataset.mode = MODE;
+  $("modeSelf").setAttribute("aria-pressed", String(self())); $("modeIv").setAttribute("aria-pressed", String(!self()));
   for (const f of document.querySelectorAll(".flag")) f.classList.toggle("on", f.dataset.l === LANG);
   for (const n of document.querySelectorAll("[data-t]")) if (typeof t(n.dataset.t) === "string" && !(n.id === "askQ" && lastQuestion)) n.textContent = t(n.dataset.t);
   for (const n of document.querySelectorAll("[data-ph]")) n.placeholder = t(n.dataset.ph);
   if (!ENUMS) return;
   fillSelect($("eScale"), ENUMS.scale, $("eScale").value || "keepsake");
   fillSelect($("eAudience"), ENUMS.audience, $("eAudience").value || "family");
-  fillSelect($("sRole"), ENUMS.role.filter((r) => !["scholar", "curator"].includes(r)), $("sRole").value || "witness");
-  fillSelect($("sAudience"), ENUMS.audience, $("sAudience").value || env?.audience || "family");
-  renderEnvSelect(); renderTiles(); renderAll();
+  fillSelect($("sRole"), ENUMS.role.filter((r) => !["scholar", "curator"].includes(r)), $("sRole").value || "witness", selfLabel);
+  fillSelect($("sAudience"), ENUMS.audience, $("sAudience").value || env?.audience || "family", selfLabel);
+  $("envForm").classList.toggle("hidden", !self() && !$("envForm").dataset.open);
+  renderEnvSelect(); renderTiles(); renderAll(); showStep();
 }
-$("lang").addEventListener("click", () => { LANG = LANG === "ja" ? "en" : "ja"; try { localStorage.setItem("gather.lang", LANG); } catch {} applyLang(); });
+$("lang").addEventListener("click", () => { LANG = LANG === "ja" ? "en" : "ja"; store("gather.lang", LANG); applyLang(); });
+function setMode(m) { MODE = m; store("gather.mode", m === "self" ? "self" : "interview"); if (self()) STEP = env ? 3 : 0; $("askAuto").checked = !self(); applyLang(); }
+$("modeSelf").addEventListener("click", () => setMode("self"));
+$("modeIv").addEventListener("click", () => setMode("interviewer"));
 
 // ---------- Envelope
 function renderEnvSelect() {
   const sel = $("envSelect"); sel.innerHTML = "";
   const first = el("option", "", t("choose")); first.value = ""; sel.append(first);
   for (const e of envelopes) { const o = el("option", "", `${e.name} · ${label(e.scale)}${e.place ? ` · ${e.place}` : ""}`); o.value = e.id; if (env?.id === e.id) o.selected = true; sel.append(o); }
+  $("envPick").classList.toggle("hidden", self() && !envelopes.length);
   const par = $("eParent"); par.innerHTML = ""; const none = el("option", "", t("none")); none.value = ""; par.append(none);
   for (const e of envelopes) { const o = el("option", "", e.name); o.value = e.id; par.append(o); }
 }
@@ -267,29 +406,78 @@ async function openEnvelope(id) {
   if (!id) { env = null; $("work").classList.add("hidden"); $("cover").innerHTML = ""; $("crumb").textContent = ""; return; }
   const d = await api(`envelope?id=${encodeURIComponent(id)}`);
   env = d.envelope; observations = d.observations; forms = d.forms; drafts = []; lastQuestion = "";
-  try { localStorage.setItem("gather.env", id); } catch {}
-  $("sAudience").value = env.audience || "family";
+  if (!self()) store("gather.env", id);
+  setVal($("sAudience"), env.audience || "family");
   $("work").classList.remove("hidden");
-  $("askQ").textContent = t("askEmpty"); $("askWhy").textContent = ""; $("askPlay").disabled = true;
+  $("askQ").textContent = t("askEmpty"); $("askWhy").textContent = ""; $("askPlay").disabled = true; delete $("askBox").dataset.layer;
   renderAll();
 }
-$("envSelect").addEventListener("change", (e) => openEnvelope(e.target.value).catch((err) => toast(err.message)));
-$("envNewBtn").addEventListener("click", () => $("envForm").classList.toggle("hidden"));
-$("envCancel").addEventListener("click", () => $("envForm").classList.add("hidden"));
+async function createEnvelope() {
+  const created = await api("envelopes", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+    name: $("eName").value, scale: $("eScale").value, place: $("ePlace").value, parent: self() ? "" : $("eParent").value, audience: self() ? "family" : $("eAudience").value, createdBy: who() }) });
+  envelopes.push(created); renderEnvSelect(); $("envSelect").value = created.id; await openEnvelope(created.id);
+}
+$("envSelect").addEventListener("change", (e) => { if (self() && e.target.value) $("eName").value = ""; openEnvelope(e.target.value).catch((err) => toast(err.message)); });
+$("eName").addEventListener("input", () => { if (self() && $("envSelect").value) { $("envSelect").value = ""; env = null; } });
+const toggleEnvForm = (open) => { if (open) $("envForm").dataset.open = "1"; else delete $("envForm").dataset.open; $("envForm").classList.toggle("hidden", !open); };
+$("envNewBtn").addEventListener("click", () => toggleEnvForm(!$("envForm").dataset.open));
+$("envCancel").addEventListener("click", () => toggleEnvForm(false));
 $("envForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  try {
-    const created = await api("envelopes", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
-      name: $("eName").value, scale: $("eScale").value, place: $("ePlace").value, parent: $("eParent").value, audience: $("eAudience").value, createdBy: $("sInterviewer").value }) });
-    envelopes.push(created); $("envForm").classList.add("hidden"); $("eName").value = "";
-    renderEnvSelect(); $("envSelect").value = created.id; await openEnvelope(created.id);
-  } catch (err) { toast(err.message); }
+  if (self()) return goNext();
+  if (!$("eName").value.trim()) return toast(t("needEnvelope"));
+  try { await createEnvelope(); toggleEnvForm(false); $("eName").value = ""; } catch (err) { toast(err.message); }
 });
+
+// ---------- Self-entry: one step at a time
+function showStep() {
+  for (const n of document.querySelectorAll(".step")) n.classList.toggle("active", Number(n.dataset.step) === STEP);
+  if (!self()) return;
+  const names = t("stepNames");
+  $("progress").classList.toggle("hidden", STEP < 1 || STEP > 5);
+  if (STEP >= 1 && STEP <= 5) { $("progText").textContent = t("stepOf")(STEP, 5, names[STEP]); $("progBar").style.width = `${STEP * 20}%`; }
+  const kept = drafts.filter((d) => d.keep).length;
+  $("navBack").textContent = t("back"); $("navBack").classList.toggle("hidden", STEP === 0 || STEP === LAST);
+  $("navAlt").textContent = t("addMore"); $("navAlt").classList.toggle("hidden", STEP !== LAST);
+  $("navNext").textContent = [t("begin"), t("next"), t("next"), t("doneTelling"), t("toCheck"), kept ? t("saveAll")(kept) : t("finish"), t("nextPerson")][STEP];
+  if (STEP === 3 && env && !lastQuestion) { lastQuestion = t("opening")(env.name); $("askQ").textContent = lastQuestion; $("askWhy").textContent = t("openingWhy"); $("askPlay").disabled = false; }
+  $("noted").textContent = t("noted")(kept);
+  $("reviewNote").textContent = drafts.length ? t("reviewNote") : t("reviewEmpty");
+}
+function go(n) { STEP = n; showStep(); window.scrollTo({ top: 0 }); }
+async function goNext() {
+  const btn = $("navNext"); if (btn.disabled) return; btn.disabled = true;
+  try {
+    if (STEP === 1) {
+      const name = $("eName").value.trim(), picked = $("envSelect").value;
+      if (name && !(env && env.name === name)) await createEnvelope();
+      else if (!name && picked) { if (env?.id !== picked) await openEnvelope(picked); }
+      else if (!env) return toast(t("needEnvelope"));
+    }
+    if (STEP === 2 && !$("sConsent").checked) return toast(t("needConsent"));
+    if (STEP === 3 && $("transcript").value.trim()) { if (!(await runInterview($("transcript").value.trim(), true))) return; }
+    if (STEP === 5 && drafts.some((d) => d.keep) && !(await saveDrafts())) return;
+    if (STEP === LAST) return nextPerson();
+    go(STEP + 1);
+  } catch (err) { toast(err.message); }
+  finally { btn.disabled = false; }
+}
+function nextPerson() { // a kiosk hands over clean: nothing of the last person stays on screen
+  for (const id of ["sSpeaker", "eName", "ePlace", "transcript", "fCaption", "fDate"]) $(id).value = "";
+  $("sConsent").checked = false; $("envSelect").value = ""; audio.pause();
+  drafts = []; observations = []; forms = []; env = null; lastQuestion = ""; sittingStart = new Date().toISOString();
+  $("work").classList.add("hidden"); $("upState").textContent = "";
+  api("envelopes").then((list) => { envelopes = list; renderEnvSelect(); }).catch(() => {});
+  renderAll(); go(0);
+}
+$("navNext").addEventListener("click", goNext);
+$("navBack").addEventListener("click", () => go(Math.max(0, STEP - 1)));
+$("navAlt").addEventListener("click", () => go(3));
 
 // ---------- Coverage of the eight layers
 const current = () => observations.filter((o) => !observations.some((x) => x.supersedes === o.id));
 function renderCover() {
-  const box = $("cover"); box.innerHTML = ""; if (!env) return;
+  const box = $("cover"); box.innerHTML = ""; if (!env) { $("crumb").textContent = ""; return; }
   const obs = current(), kinds = new Set(obs.map((o) => o.kind)), strata = new Set(obs.map((o) => o.stratum));
   const cells = [
     ["form", "形", forms.length, forms.length],
@@ -309,6 +497,19 @@ function renderCover() {
   const parent = env.parent && envelopes.find((e) => e.id === env.parent);
   $("crumb").textContent = `${parent ? `${parent.name} › ` : ""}${env.name}${env.place ? ` · ${env.place}` : ""}`;
 }
+// Clues: the topics a full record needs, as a ready script. Ticked once something covers them.
+const CLUES = [["when", "time", (o) => o.when], ["who", "actors", (o) => o.actors?.length], ["use", "types", (o) => ["use", "making", "event"].includes(o.kind)],
+  ["meaning", "evidence", (o) => o.kind === "meaning"], ["passed", "protocol", (o) => o.kind === "inheritance"], ["lost", "absence", (o) => o.kind === "absence"]];
+function renderClues() {
+  const box = $("clues"); box.innerHTML = "";
+  const have = [...(self() ? current().filter((o) => o.createdAt >= sittingStart) : current()), ...drafts.filter((d) => d.keep)];
+  for (const [key, layer, test] of CLUES) {
+    const [name, question] = t("clues")[key];
+    const b = el("button", `clue${have.some(test) ? " done" : ""}`, name); b.type = "button"; b.dataset.layer = layer;
+    b.addEventListener("click", () => showQuestion({ question: (!self() && S[LANG].cluesIv?.[key]) || question, layer, why: "" }));
+    box.append(b);
+  }
+}
 
 // ---------- Voice: speak the question, hear the answer
 const audio = new Audio();
@@ -326,24 +527,26 @@ async function speak(text) {
 function showQuestion(next) {
   if (!next?.question) return;
   lastQuestion = next.question;
-  $("askQ").textContent = next.question; $("askWhy").textContent = `${t("cover")[next.layer] || ""}${next.why ? ` · ${next.why}` : ""}`;
+  $("askQ").textContent = next.question;
+  $("askWhy").textContent = self() ? (next.why || "") : `${t("cover")[next.layer] || ""}${next.why ? ` · ${next.why}` : ""}`;
   $("askBox").dataset.layer = next.layer; $("askPlay").disabled = false;
   if ($("askAuto").checked) speak(next.question);
 }
 $("askPlay").addEventListener("click", () => lastQuestion && speak(lastQuestion));
-async function runInterview(transcript) {
+async function runInterview(transcript, quiet) {
   $("extract").disabled = $("askNew").disabled = true; $("extractState").textContent = t("thinking");
   try {
     const d = await api("interview", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
-      envelope: env.id, lang: LANG, transcript, lastQuestion, speaker: { name: $("sSpeaker").value, role: $("sRole").value } }) });
-    if (transcript && !d.observations.length) toast(t("nothingFound"));
+      envelope: env.id, lang: LANG, mode: MODE, transcript, lastQuestion, speaker: { name: $("sSpeaker").value, role: $("sRole").value } }) });
+    if (transcript && !d.observations.length && !quiet) toast(t("nothingFound"));
     for (const o of d.observations) drafts.push({ ...o, keep: true, audience: o.restricted ? "family" : $("sAudience").value });
-    if (d.observations.length) $("transcript").value = "";
-    renderDrafts(); showQuestion(d.next);
-  } catch (err) { toast(err.message); }
+    if (d.observations.length || quiet) $("transcript").value = "";
+    renderDrafts(); if (!quiet) showQuestion(d.next);
+    return true;
+  } catch (err) { toast(err.message); return false; }
   finally { $("extract").disabled = $("askNew").disabled = false; $("extractState").textContent = ""; }
 }
-$("extract").addEventListener("click", () => { const tx = $("transcript").value.trim(); if (tx) runInterview(tx); });
+$("extract").addEventListener("click", () => { const tx = $("transcript").value.trim(); if (tx || self()) runInterview(tx); });
 $("askNew").addEventListener("click", () => runInterview(""));
 
 let rec = null, tick = null;
@@ -375,6 +578,7 @@ $("mic").addEventListener("click", async () => {
 // ---------- Draft observations: review before anything is saved
 function sel(values, value, on) { const s = el("select"); fillSelect(s, values, value); s.addEventListener("change", () => on(s.value)); return s; }
 function field(text, input) { const w = el("label", "f"); w.append(el("span", "", text), input); return w; }
+function chipIn(box, text, layer, solid) { const c = el("span", `chip${solid ? " solid" : ""}`, text); if (layer) c.dataset.layer = layer; box.append(c); }
 function renderDrafts() {
   const box = $("drafts"); box.innerHTML = "";
   drafts.forEach((d) => {
@@ -383,9 +587,14 @@ function renderDrafts() {
     const claim = el("textarea"); claim.rows = 2; claim.value = d.claim; claim.addEventListener("input", () => { d.claim = claim.value; });
     card.append(claim);
     if (d.quote) card.append(el("div", "quote", `“${d.quote}”`));
+    const chips = el("div", "chips");
+    if (d.when) chipIn(chips, d.when, "time", true);
+    chipIn(chips, label(d.kind), d.kind === "absence" ? "absence" : "types", true);
+    for (const a of d.actors || []) chipIn(chips, a, "actors");
+    card.append(chips);
     const g = el("div", "grid");
     const when = el("input"); when.value = d.when || ""; when.addEventListener("input", () => { d.when = when.value; });
-    g.append(field(t("dKind"), sel(ENUMS.kind, d.kind, (v) => { d.kind = v; if (v === "absence") { d.absenceCause = d.absenceCause || "never-collected"; d.evidence = "none"; } renderDrafts(); })),
+    g.append(field(t("dKind"), sel(ENUMS.kind, d.kind, (v) => { d.kind = v; if (v === "absence") { d.absenceCause = d.absenceCause || "never-collected"; d.evidence = "none"; } d.open = true; renderDrafts(); })),
       field(t("dStratum"), sel(ENUMS.stratum, d.stratum, (v) => { d.stratum = v; })), field(t("dWhen"), when),
       field(t("dEvidence"), sel(ENUMS.evidence, d.evidence, (v) => { d.evidence = v; })), field(t("dRole"), sel(ENUMS.role, d.role, (v) => { d.role = v; })),
       field(t("dAudience"), sel(ENUMS.audience, d.audience, (v) => { d.audience = v; })));
@@ -393,33 +602,37 @@ function renderDrafts() {
       const note = el("input"); note.value = d.absenceNote || ""; note.addEventListener("input", () => { d.absenceNote = note.value; });
       g.append(field(t("dCause"), sel(ENUMS.cause, d.absenceCause || "never-collected", (v) => { d.absenceCause = v; })), field(t("dNote"), note));
     }
-    card.append(g);
-    if (d.actors?.length) { const c = el("div", "chips"); for (const a of d.actors) { const ch = el("span", "chip", a); ch.style.setProperty("--c", "var(--l-actors)"); c.append(ch); } card.append(c); }
+    const det = el("details"); det.open = !self() || !!d.open; det.addEventListener("toggle", () => { d.open = det.open; });
+    det.append(el("summary", "", t("details")), g); card.append(det);
     const b = el("button", "quiet", d.keep ? t("drop") : t("keep")); b.type = "button"; b.addEventListener("click", () => { d.keep = !d.keep; renderDrafts(); });
     const row = el("div", "row"); row.append(b); card.append(row);
     box.append(card);
   });
   const n = drafts.filter((d) => d.keep).length;
   $("saveRow").classList.toggle("hidden", !drafts.length); $("save").textContent = t("save")(n); $("save").disabled = !n;
+  $("reviewCard").classList.toggle("hidden", !self() && !drafts.length);
+  renderClues(); showStep();
 }
-$("save").addEventListener("click", async () => {
-  if (!$("sConsent").checked) return toast(t("needConsent"));
-  if (!$("sInterviewer").value.trim()) return toast(t("needName"));
+async function saveDrafts() {
+  if (!$("sConsent").checked) { toast(t("needConsent")); return false; }
+  if (!self() && !$("sInterviewer").value.trim()) { toast(t("needName")); return false; }
   const items = drafts.filter((d) => d.keep);
   try {
     const r = await api("observations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
-      session: { envelope: env.id, interviewer: $("sInterviewer").value, speaker: $("sSpeaker").value, grantedBy: $("sGranted").value, audience: $("sAudience").value, consent: true, lang: LANG },
+      session: { envelope: env.id, mode: MODE, interviewer: $("sInterviewer").value, speaker: $("sSpeaker").value, grantedBy: self() ? "" : $("sGranted").value, audience: $("sAudience").value, consent: true, lang: LANG },
       items }) });
     toast(t("saved")(r.saved)); drafts = [];
     const d = await api(`envelope?id=${encodeURIComponent(env.id)}`); observations = d.observations; forms = d.forms; renderAll();
-  } catch (err) { toast(err.message); }
-});
+    return true;
+  } catch (err) { toast(err.message); return false; }
+}
+$("save").addEventListener("click", saveDrafts);
 
-// ---------- The record
+// ---------- The record. In self-entry a person sees only what they saved in this sitting.
 const STRATA = ["made", "lived", "observed", "present"];
 function renderRecord() {
   const box = $("record"); box.innerHTML = "";
-  const obs = current();
+  const obs = current().filter((o) => !self() || o.createdAt >= sittingStart);
   if (!obs.length) { box.append(el("div", "muted", t("emptyRecord"))); return; }
   for (const st of STRATA) {
     const items = obs.filter((o) => o.stratum === st).sort((a, b) => (a.kind === "absence") - (b.kind === "absence"));
@@ -431,16 +644,16 @@ function renderRecord() {
       if (o.absence?.note) c.append(el("div", "muted", `${label(o.absence.cause)} — ${o.absence.note}`));
       if (o.quote) c.append(el("div", "quote", `“${o.quote}”`));
       const chips = el("div", "chips");
-      const chip = (text, color, solid) => { const s = el("span", `chip${solid ? " solid" : ""}`, text); s.style.setProperty("--c", color); chips.append(s); };
-      if (o.when) chip(o.when, "var(--l-time)", true);
-      chip(label(o.kind), o.kind === "absence" ? "var(--l-absence)" : "var(--l-types)", true);
-      chip(label(o.evidence), "var(--l-evidence)"); chip(label(o.standing.role), "var(--l-evidence)", true);
-      for (const a of o.actors || []) chip(a, "var(--l-actors)");
-      chip(label(o.protocol.audience), "var(--l-protocol)");
-      c.append(chips, el("div", "muted", `${t("by")} ${o.speaker} · ${o.createdAt.slice(0, 10)} · ${o.author}`));
+      if (o.when) chipIn(chips, o.when, "time", true);
+      chipIn(chips, label(o.kind), o.kind === "absence" ? "absence" : "types", true);
+      chipIn(chips, label(o.evidence), "evidence"); chipIn(chips, label(o.standing.role), "evidence", true);
+      for (const a of o.actors || []) chipIn(chips, a, "actors");
+      chipIn(chips, selfLabel(o.protocol.audience), "protocol", true);
+      c.append(chips);
+      if (!self()) c.append(el("div", "muted", `${t("by")} ${o.speaker} · ${o.createdAt.slice(0, 10)} · ${o.author}`));
       const row = el("div", "row");
       const fix = el("button", "link", t("correct")); fix.type = "button";
-      fix.addEventListener("click", () => { drafts.push({ claim: o.claim, quote: o.quote, kind: o.kind, stratum: o.stratum, when: o.when, evidence: o.evidence, role: o.standing.role, actors: o.actors, absenceCause: o.absence?.cause, absenceNote: o.absence?.note, audience: o.protocol.audience, supersedes: o.id, keep: true }); renderDrafts(); $("drafts").scrollIntoView({ behavior: "smooth", block: "center" }); });
+      fix.addEventListener("click", () => { drafts.push({ claim: o.claim, quote: o.quote, kind: o.kind, stratum: o.stratum, when: o.when, evidence: o.evidence, role: o.standing.role, actors: o.actors, absenceCause: o.absence?.cause, absenceNote: o.absence?.note, audience: o.protocol.audience, supersedes: o.id, keep: true }); renderDrafts(); if (self()) go(5); else $("drafts").scrollIntoView({ behavior: "smooth", block: "center" }); });
       row.append(fix);
       let n = 0; for (let p = o; p?.supersedes; p = observations.find((x) => x.id === p.supersedes)) n++;
       if (n) row.append(el("span", "muted", t("earlier")(n)));
@@ -450,7 +663,7 @@ function renderRecord() {
 }
 
 // ---------- Form: uploads, each with its reality basis
-const TILES = [["splat", "tSplat", "tSplatSub", ".sog,.spz,.ply,.splat,.ksplat", false], ["photo", "tPhoto", "tPhotoSub", "image/*", true], ["scan", "tScan", "tScanSub", ".glb,.obj,.stl,.ply", false], ["reconstruction", "tSynth", "tSynthSub", ".glb,.obj,.stl", false]];
+const TILES = [["photo", "tPhoto", "tPhotoSub", "image/*", true], ["splat", "tSplat", "tSplatSub", ".sog,.spz,.ply,.splat,.ksplat", false], ["scan", "tScan", "tScanSub", ".glb,.obj,.stl,.ply", false], ["reconstruction", "tSynth", "tSynthSub", ".glb,.obj,.stl", false]];
 function renderTiles() {
   const box = $("tiles"); box.innerHTML = "";
   for (const [kind, name, sub, accept, multiple] of TILES) {
@@ -477,7 +690,7 @@ async function uploadFiles(kind, files) {
   for (const raw of files) {
     const file = kind === "photo" ? await shrink(raw) : raw;
     $("upState").textContent = t("uploading")(file.name);
-    const q = new URLSearchParams({ envelope: env.id, kind, name: file.name, caption: $("fCaption").value, date: $("fDate").value, by: $("sInterviewer").value, audience: $("sAudience").value });
+    const q = new URLSearchParams({ envelope: env.id, kind, name: file.name, caption: $("fCaption").value, date: $("fDate").value, by: who(), audience: $("sAudience").value });
     try { forms.push(await api(`upload?${q}`, { method: "PUT", headers: { "content-type": file.type || "application/octet-stream" }, body: file })); $("upState").textContent = t("uploaded"); }
     catch (err) { $("upState").textContent = err.message; }
     renderForms(); renderCover();
@@ -485,7 +698,7 @@ async function uploadFiles(kind, files) {
 }
 function renderForms() {
   const box = $("forms"); box.innerHTML = "";
-  for (const f of forms) {
+  for (const f of forms.filter((x) => !self() || x.createdAt >= sittingStart)) {
     const d = el("div", "formitem");
     if (f.kind === "photo") { const img = el("img"); img.src = `/api/gather/file/${f.file}`; img.alt = f.caption || f.name; img.loading = "lazy"; d.append(img); }
     d.append(el("b", "", t({ splat: "tSplat", photo: "tPhoto", scan: "tScan", reconstruction: "tSynth" }[f.kind])), el("span", `basis ${f.basis}`, t(f.basis)));
@@ -498,10 +711,11 @@ function renderAll() { renderCover(); renderDrafts(); renderRecord(); renderForm
 
 // ---------- Go
 remember("sInterviewer"); // the speaker's name is not kept in the browser
+$("askAuto").checked = !self();
 [ENUMS, envelopes] = await Promise.all([api("enums"), api("envelopes")]);
 applyLang();
-let last = null; try { last = localStorage.getItem("gather.env"); } catch {}
-if (last && envelopes.some((e) => e.id === last)) { $("envSelect").value = last; openEnvelope(last).catch(() => {}); }
+const last = stored("gather.env");
+if (!self() && last && envelopes.some((e) => e.id === last)) { $("envSelect").value = last; openEnvelope(last).catch(() => {}); }
 </script>
 </body>
 </html>
