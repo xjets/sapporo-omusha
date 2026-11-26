@@ -850,7 +850,9 @@ $("askAuto").checked = !self();
 [ENUMS, envelopes] = await Promise.all([api("enums"), api("envelopes")]);
 applyLang();
 const last = stored("gather.env");
-if (!self() && last && envelopes.some((e) => e.id === last)) { $("envSelect").value = last; openEnvelope(last).catch(() => {}); }
+const wanted = params.get("envelope"); // opened from "Add to this item" in the collection
+if (wanted && envelopes.some((e) => e.id === wanted)) { $("envSelect").value = wanted; openEnvelope(wanted).then(() => setTimeout(() => $("tiles").scrollIntoView({ block: "center" }), 400)).catch(() => {}); }
+else if (!self() && last && envelopes.some((e) => e.id === last)) { $("envSelect").value = last; openEnvelope(last).catch(() => {}); }
 </script>
 </body>
 </html>

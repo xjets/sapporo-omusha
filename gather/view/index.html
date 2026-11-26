@@ -242,6 +242,7 @@ function renderItem() {
   const left = el("section", "card"); left.dataset.layer = "form";
   left.append(el("h2", "pen", e.noOriginal ? e.tr.name : nameOf(e)), el("div", "muted", [label(e.scale), e.noOriginal ? e.place : placeOf(e)].filter(Boolean).join(" · ")));
   if (e.featured) { const a = el("a", "btn", `${t("openDiorama")} →`); a.href = `/src/?lang=${LANG}`; a.style.justifySelf = "start"; left.append(a); }
+  else { const a = el("a", "btn", LANG === "ja" ? "この項目に追加する（写真・3D・語り）" : "Add to this item (photos, 3D, more to tell)"); a.href = `/gather/?mode=interview&envelope=${encodeURIComponent(e.id)}&lang=${LANG}`; a.style.justifySelf = "start"; a.style.textDecoration = "none"; left.append(a); }
   if (ADMIN) {
     const row = el("div", ""); row.style.cssText = "display:flex;flex-wrap:wrap;gap:8px";
     const btn = (text, run) => { const b = el("button", "btn", text); b.type = "button"; b.addEventListener("click", run); row.append(b); };
