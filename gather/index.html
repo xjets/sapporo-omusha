@@ -107,6 +107,8 @@
   .clues { display: flex; flex-wrap: wrap; gap: 7px; }
   .clue { min-height: 36px !important; padding: 4px 12px !important; border-radius: 999px; font-size: .85em; font-weight: 700; color: var(--lc); background: var(--card); border-color: var(--lb); }
   .clue.done { background: var(--lb); } .clue.done::before { content: "✓"; }
+  .clue.full, .left button { width: 100%; justify-content: flex-start; text-align: left; border-radius: 14px; font-weight: 600; font-size: .95em; min-height: 44px !important; padding: 8px 14px !important; }
+  .left { display: grid; gap: 6px; } .left > span { font-size: .8em; font-weight: 800; color: var(--lc, var(--voice)); }
   .mic { width: 84px; height: 84px; min-height: 84px !important; padding: 0 !important; border-radius: 50%; background: var(--voice-b); border-color: transparent; color: var(--voice); font-size: 30px; }
   .mic:hover { background: #c5dfdb; }
   .mic[aria-pressed=true] { background: var(--rec); color: #fff; animation: pulse 1.3s infinite; }
@@ -164,6 +166,7 @@
     <div class="ask self-only" id="say1"><div class="q" id="say1Q"></div>
       <div class="row" style="gap:16px"><button type="button" class="mic" id="mic1" aria-pressed="false" aria-label="Record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
         <div style="flex:1;min-width:0"><div id="mic1State" style="font-weight:600"></div><div class="muted" id="say1Heard"></div></div></div>
+      <div class="left hidden" id="say1Left"></div>
       <div class="row"><button type="button" class="quiet" id="say1Play"><span data-t="playQ"></span></button><label class="check small"><input type="checkbox" class="autoRead"><span data-t="autoAsk"></span></label></div>
     </div>
     <div class="muted self-only" data-t="orType"></div>
@@ -189,6 +192,7 @@
     <div class="ask self-only" id="say2"><div class="q" id="say2Q"></div>
       <div class="row" style="gap:16px"><button type="button" class="mic" id="mic2" aria-pressed="false" aria-label="Record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
         <div style="flex:1;min-width:0"><div id="mic2State" style="font-weight:600"></div><div class="muted" id="say2Heard"></div></div></div>
+      <div class="left hidden" id="say2Left"></div>
       <div class="row"><button type="button" class="quiet" id="say2Play"><span data-t="playQ"></span></button><label class="check small"><input type="checkbox" class="autoRead"><span data-t="autoAsk"></span></label></div>
     </div>
     <div class="muted self-only" data-t="orType"></div>
@@ -218,6 +222,7 @@
       <button class="mic" id="mic" aria-pressed="false" aria-label="Record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
       <div style="flex:1;min-width:0"><div id="micState" style="font-weight:600" data-t="micIdle"></div><div class="muted" id="noted"></div></div>
     </div>
+    <div class="quote hidden" id="told"></div>
     <label class="f"><span data-t="fTranscript"></span><textarea id="transcript" rows="5"></textarea></label>
     <div class="row"><button class="primary" id="extract" data-t="extract">Sort into observations</button><span class="muted" id="extractState"></span></div>
   </section>
@@ -269,7 +274,7 @@ const S = {
     stepOf: (n, m, name) => `Step ${n} of ${m} · ${name}`, stepNames: ["", "What is it about?", "About you", "Tell", "Pictures", "Check"],
     begin: "Begin", next: "Next", back: "Back", doneTelling: "I have finished telling", toCheck: "Next: check it", saveAll: (n) => `Save ${n}`, finish: "Finish", addMore: "Tell more", nextPerson: "Done · start again for the next person",
     needEnvelope: "Give it a name first, or choose one from the list.",
-    orType: "Or fill it in below.", sayIdle: "Tap the microphone and speak. Tap again to stop.", sayReading: "Reading what you said…",
+    orType: "Or fill it in below.", stillLeft: "Still to answer. Tap one, or just say it.", partsSoFar: (n) => `Told so far, in ${n} part${n > 1 ? "s" : ""}:`, sayIdle: "Tap the microphone and speak. Tap again to stop.", sayReading: "Reading what you said…",
     say: { start1: "What would you like to tell about? Say what it is, and where it is.", name: "What do you call it?", scale: "What kind of thing is it? An object, a room, a building, a place?", place: "Where is it? A town or a place name is enough.",
       done1: (x) => `Got it: ${x}. Press Next, or say it again to change it.`,
       start2: "Now about you. Say your name if you wish, how you know about it, and who may see what you tell.", role: "How do you know about it? Did you see it yourself, hear it in your family, or hear it from others?",
@@ -288,7 +293,7 @@ const S = {
     hTalk: "Listen and ask", hTalk_self: "Tell it in your own words", askNext: "Ask next", askNext_self: "Question", askEmpty: "Press “Suggest a question” to begin, or just start recording.",
     opening: (n) => `What do you remember about ${n}?`, openingWhy: "Start anywhere. There are no wrong answers.",
     playQ: "Ask aloud", playQ_self: "Hear it", suggest: "Suggest a question", suggest_self: "A different question", autoAsk: "ask aloud automatically", autoAsk_self: "read questions aloud",
-    cluesTitle: "Script: tap a topic to ask about it", cluesTitle_self: "Things worth telling. Tap one for a question.",
+    cluesTitle: "Script: tap a topic to ask about it", cluesTitle_self: "Not told yet. Tap a question, or just keep talking in as many parts as you like.",
     clues: { when: ["When", "When was this? A year, a season, or how old you were then."], who: ["Who", "Who was there? Who made it, used it or looked after it?"], use: ["What it was for", "What was it used for, day to day?"],
       meaning: ["What it meant", "What did it mean to you, or to your family?"], passed: ["How it was passed on", "How did it come to you, and who should have it next?"], lost: ["What is no longer known", "Is there something about it that nobody knows any more, or that nobody ever asked?"] },
     cluesIv: { when: "When was this? A year, a season, or how old were you then?", who: "Who was there? Who made it, used it or looked after it?", use: "What was it used for, day to day?", meaning: "What did it mean to you, or to your family?", passed: "How did it come to you, and who should have it next?", lost: "Is there something about it that nobody knows any more, or that nobody ever asked?" },
@@ -320,7 +325,7 @@ const S = {
     stepOf: (n, m, name) => `${m}のうち${n} · ${name}`, stepNames: ["", "何についてですか", "あなたについて", "話す", "写真", "確かめる"],
     begin: "はじめる", next: "次へ", back: "戻る", doneTelling: "話し終えました", toCheck: "次へ：確かめる", saveAll: (n) => `${n}件を保存する`, finish: "終わる", addMore: "もっと話す", nextPerson: "終了 · 次の方のために最初に戻る",
     needEnvelope: "名前を入れるか、一覧から選んでください。",
-    orType: "または、下に入力してください。", sayIdle: "マイクをタップして話してください。もう一度タップで止まります。", sayReading: "お話を読み取っています…",
+    orType: "または、下に入力してください。", stillLeft: "まだ伺っていないこと。タップするか、そのまま話してください。", partsSoFar: (n) => `これまでのお話（${n}回）：`, sayIdle: "マイクをタップして話してください。もう一度タップで止まります。", sayReading: "お話を読み取っています…",
     say: { start1: "何について話したいですか。それが何か、どこにあるかを話してください。", name: "それを何と呼んでいますか。", scale: "どんなものですか。品物、部屋、建物、場所など。", place: "どこにありますか。町や場所の名前だけでかまいません。",
       done1: (x) => `わかりました：${x}。「次へ」を押すか、変えたいときはもう一度話してください。`,
       start2: "次に、あなたについて。よければお名前、どのようにして知っているか、だれが見てよいかを話してください。", role: "どのようにして知っていますか。自分で見たこと、家族から聞いたこと、人から聞いたことなど。",
@@ -339,7 +344,7 @@ const S = {
     hTalk: "聞く・たずねる", hTalk_self: "自分の言葉で話してください", askNext: "次の質問", askNext_self: "質問", askEmpty: "「質問を提案」を押すか、そのまま録音を始めてください。",
     opening: (n) => `「${n}」について、覚えていることを聞かせてください。`, openingWhy: "どこからでもかまいません。まちがいはありません。",
     playQ: "声でたずねる", playQ_self: "声で聞く", suggest: "質問を提案", suggest_self: "別の質問", autoAsk: "自動で読み上げる", autoAsk_self: "質問を読み上げる",
-    cluesTitle: "台本：話題をタップしてたずねる", cluesTitle_self: "話してほしいこと。タップすると質問が出ます。",
+    cluesTitle: "台本：話題をタップしてたずねる", cluesTitle_self: "まだ伺っていないこと。質問をタップするか、何回に分けてでも続けて話してください。",
     clues: { when: ["いつ", "それはいつごろのことですか。年、季節、そのころの年齢でもかまいません。"], who: ["だれ", "そこにはだれがいましたか。作った人、使った人、世話をした人は。"], use: ["何に使ったか", "ふだん、何に使われていましたか。"],
       meaning: ["どんな意味があったか", "あなたやご家族にとって、どんな意味がありましたか。"], passed: ["どう受け継いだか", "どのようにしてあなたのもとに来ましたか。次はだれに渡したいですか。"], lost: ["もう分からないこと", "もうだれも知らないこと、だれにも聞かれなかったことはありますか。"] },
     micIdle: "タップして答えを録音。もう一度タップで停止。", micIdle_self: "マイクをタップして話してください。もう一度タップで止まります。", micRec: (s) => `録音中… ${s}秒 · タップで停止`, micBusy: "書き起こしています…", micBlocked: "マイクが使えません。ブラウザで許可するか、下に入力してください。",
@@ -385,7 +390,7 @@ const selfLabel = (v) => (self() && S[LANG].vSelf[v]) || label(v);
 // ---------- State
 let ENUMS = null, envelopes = [], env = null, observations = [], forms = [], drafts = [], lastQuestion = "", STEP = 0, sittingStart = new Date().toISOString();
 const LAST = 6;
-let got = {}, said = {}, carry = ""; // what has been filled by voice or by hand in this sitting
+let got = {}, said = {}, carry = "", focus = {}, parts = { 1: [], 2: [], 3: [] }; // what has been filled by voice or by hand in this sitting
 const remember = (id) => { const n = $(id); n.value = stored(`gather.${id}`) || n.value; n.addEventListener("change", () => store(`gather.${id}`, n.value)); };
 const who = () => (self() ? $("sSpeaker").value : $("sInterviewer").value).trim();
 
@@ -500,7 +505,7 @@ function nextPerson() { // a kiosk hands over clean: nothing of the last person 
   for (const id of ["sSpeaker", "eName", "ePlace", "transcript", "fCaption", "fDate"]) $(id).value = "";
   $("sConsent").checked = false; $("envSelect").value = ""; audio.pause();
   drafts = []; observations = []; forms = []; env = null; lastQuestion = ""; sittingStart = new Date().toISOString();
-  got = {}; said = {}; carry = ""; for (const n of [1, 2]) $(`say${n}Heard`).textContent = "";
+  got = {}; said = {}; carry = ""; focus = {}; parts = { 1: [], 2: [], 3: [] }; renderParts(); for (const n of [1, 2]) $(`say${n}Heard`).textContent = "";
   $("work").classList.add("hidden"); $("upState").textContent = "";
   api("envelopes").then((list) => { envelopes = list; renderEnvSelect(); }).catch(() => {});
   renderAll(); go(0);
@@ -538,10 +543,11 @@ const CLUES = [["when", "time", (o) => o.when], ["who", "actors", (o) => o.actor
 function renderClues() {
   const box = $("clues"); box.innerHTML = "";
   const have = [...(self() ? current().filter((o) => o.createdAt >= sittingStart) : current()), ...drafts.filter((d) => d.keep)];
-  for (const [key, layer, test] of CLUES) {
-    const [name, question] = t("clues")[key];
-    const b = el("button", `clue${have.some(test) ? " done" : ""}`, name); b.type = "button"; b.dataset.layer = layer;
-    b.addEventListener("click", () => showQuestion({ question: (!self() && S[LANG].cluesIv?.[key]) || question, layer, why: "" }));
+  const rows = CLUES.map(([key, layer, test]) => ({ key, layer, done: have.some(test) }));
+  for (const { key, layer, done } of [...rows.filter((r) => !r.done), ...rows.filter((r) => r.done)]) {
+    const [name, question] = t("clues")[key], ask = (!self() && S[LANG].cluesIv?.[key]) || question;
+    const b = el("button", done ? "clue done" : "clue full", done ? name : ask); b.type = "button"; b.dataset.layer = layer;
+    b.addEventListener("click", () => showQuestion({ question: ask, layer, why: "" }));
     box.append(b);
   }
 }
@@ -612,6 +618,7 @@ function wireMic(mic, stateEl, idle, onText) {
 }
 // Telling: in self-entry what was said is sorted straight away and the next question follows from what is still missing.
 async function heard(text) {
+  parts[3].push(text); renderParts();
   const box = $("transcript"); box.value = (box.value ? `${box.value.trim()}\n` : "") + text;
   if (self()) await runInterview(box.value.trim());
 }
@@ -619,31 +626,57 @@ wireMic($("mic"), $("micState"), "micIdle", heard);
 
 // ---------- Filling the first two steps by voice
 const readAloud = () => $("askAuto").checked;
-for (const c of document.querySelectorAll(".autoRead")) c.addEventListener("change", () => { for (const o of document.querySelectorAll(".autoRead")) o.checked = c.checked; });
-function sayText(step) {
-  const p = t("say");
+for (const c of document.querySelectorAll(".autoRead")) c.addEventListener("change", () => {
+  for (const o of document.querySelectorAll(".autoRead")) o.checked = c.checked;
+  if (!c.checked) { audio.pause(); return; }
+  const now = self() && (STEP === 1 || STEP === 2) ? $(`say${STEP}Q`).textContent : lastQuestion;
+  if (now) speak(now);
+});
+function sayMissing(step) {
+  const m = [];
   if (step === 1) {
-    if ($("envSelect").value && !$("eName").value.trim()) return p.done1($("envSelect").selectedOptions[0].textContent);
-    if (!$("eName").value.trim()) return said[1] ? p.name : p.start1;
-    if (!got.scale) return p.scale;
-    if (!$("ePlace").value.trim() && !got.place) return p.place;
-    return p.done1([$("eName").value.trim(), label($("eScale").value), $("ePlace").value.trim()].filter(Boolean).join(" · "));
+    if ($("envSelect").value && !$("eName").value.trim()) return m;
+    if (!$("eName").value.trim()) m.push("name");
+    if (!got.scale) m.push("scale");
+    if (!$("ePlace").value.trim() && !got.place) m.push("place");
+  } else {
+    if (!got.role) m.push("role");
+    if (!got.audience) m.push("audience");
+    if (!$("sSpeaker").value.trim() && !got.name) m.push("speaker");
+    if (!$("sConsent").checked) m.push("consent");
   }
-  if (!said[2] && !got.role && !got.audience) return p.start2;
-  if (!got.role) return p.role;
-  if (!got.audience) return p.audience;
-  if (!$("sSpeaker").value.trim() && !got.name) return p.speaker;
-  return $("sConsent").checked ? p.done2 : p.consent;
+  return m;
+}
+function sayText(step) {
+  const p = t("say"), m = sayMissing(step);
+  if (step === 1) {
+    if (!said[1] && m.includes("name") && !got.scale) return p.start1;
+    if (!m.length) return p.done1($("eName").value.trim() ? [$("eName").value.trim(), label($("eScale").value), $("ePlace").value.trim()].filter(Boolean).join(" · ") : $("envSelect").selectedOptions[0].textContent);
+  } else {
+    if (!said[2] && !got.role && !got.audience) return p.start2;
+    if (!m.length) return p.done2;
+  }
+  return p[m.includes(focus[step]) ? focus[step] : m[0]];
+}
+function renderParts() {
+  for (const n of [1, 2]) $(`say${n}Heard`).textContent = parts[n].map((x) => `“${x}”`).join(" ");
+  const told = $("told"); told.classList.toggle("hidden", !parts[3].length);
+  told.textContent = parts[3].length ? `${t("partsSoFar")(parts[3].length)} ${parts[3].map((x) => `“${x}”`).join(" ")}` : "";
 }
 function updateSay(aloud) {
   if (!self() || (STEP !== 1 && STEP !== 2)) return;
-  const text = sayText(STEP), q = $(`say${STEP}Q`);
+  const p = t("say"), text = sayText(STEP), q = $(`say${STEP}Q`);
   const changed = q.textContent !== text; q.textContent = text;
   $(`mic${STEP}State`).textContent = rec ? $(`mic${STEP}State`).textContent : t("sayIdle");
+  // The other questions still unanswered, as a list to tap
+  const left = $(`say${STEP}Left`), rest = sayMissing(STEP).filter((k) => k !== "consent" && p[k] !== text);
+  left.innerHTML = ""; left.classList.toggle("hidden", !rest.length || text === p.start1 || text === p.start2);
+  if (rest.length) left.append(el("span", "", t("stillLeft")));
+  for (const k of rest) { const b = el("button", "", p[k]); b.type = "button"; b.addEventListener("click", () => { focus[STEP] = k; updateSay(true); }); left.append(b); }
   if (aloud && changed && readAloud()) speak(text);
 }
 async function intake(step, text) {
-  $(`say${step}Heard`).textContent = `“${text}”`;
+  parts[step].push(text); renderParts();
   const asked = $(`say${step}Q`).textContent, p = t("say");
   // After an open prompt anything said may fill or change a field; after a question about one thing, only what is still empty is filled.
   const open = ![p.name, p.scale, p.place, p.role, p.audience, p.speaker].includes(asked);
