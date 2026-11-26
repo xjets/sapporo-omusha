@@ -74,6 +74,15 @@
   .path h3 { font-size: 25px; line-height: 1.15; }
   .path p { color: var(--soft); font-size: 15px; }
   .go { justify-self: start; background: var(--c); color: #fff; border-radius: 999px; padding: 10px 20px; font-weight: 800; font-size: 15px; }
+  /* the highlighted example: full width, picture beside the words */
+  a.path.feature { grid-template-rows: none; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 0; padding: 0; overflow: hidden; }
+  .feature .shot { background: #1c232b; min-height: 300px; position: relative; }
+  .feature .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .feature .ftext { padding: 28px 30px; display: grid; gap: 12px; align-content: center; }
+  .feature h3 { font-size: 34px; }
+  .feature p { font-size: 16px; }
+  .paths { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 700px) { a.path.feature { grid-template-columns: 1fr; } .feature .shot { min-height: 200px; } .paths { grid-template-columns: 1fr; } }
   .p1 { --c: var(--voice); --b: var(--voice-b); } .p2 { --c: var(--form); --b: var(--form-b); } .p3 { --c: var(--evidence); --b: var(--evidence-b); }
 
   /* about */
@@ -121,6 +130,15 @@
   </section>
 
   <div><span class="eyebrow" data-t="waysEyebrow"></span></div>
+  <!-- The highlighted example. Its picture is museum material, so it is kept with the other media, not in this repository:
+       an admin uploads it as the tile picture "omusha-feature"; until then the collection's diorama tile picture is shown. -->
+  <a class="path feature p3" id="a3" href="src/">
+    <div class="shot"><img src="/api/gather/thumb?id=omusha-feature" alt="" onerror="this.onerror=null;this.src='/api/gather/thumb?id=omusha-diorama'"></div>
+    <div class="ftext">
+      <div class="head"><span class="seal">館</span><span class="step" data-t="s3"></span></div>
+      <h3 class="pen" data-t="h3"></h3><p data-t="d3"></p><span class="go" data-t="g3"></span>
+    </div>
+  </a>
   <section class="paths">
     <a class="path p1" id="a1" href="gather/">
       <div class="head"><span class="seal">集</span><span class="step" data-t="s1"></span></div>
@@ -129,10 +147,6 @@
     <a class="path p2" id="a2" href="gather/view/">
       <div class="head"><span class="seal">蔵</span><span class="step" data-t="s2"></span></div>
       <h3 class="pen" data-t="h2"></h3><p data-t="d2"></p><span class="go" data-t="g2"></span>
-    </a>
-    <a class="path p3" id="a3" href="src/">
-      <div class="head"><span class="seal">館</span><span class="step" data-t="s3"></span></div>
-      <h3 class="pen" data-t="h3"></h3><p data-t="d3"></p><span class="go" data-t="g3"></span>
     </a>
   </section>
 
@@ -160,10 +174,10 @@ const S = {
     kindsLbl: "An envelope can be",
     kinds: ["something big", "something small", "something new", "something old", "a memory of a place", "a memory of a person", "a keepsake", "a room", "a building", "a village", "a museum display", "a photograph", "a recipe", "a festival", "a workplace", "a journey", "a song", "a day that is remembered"],
     grow: "Envelopes keep growing. More can be told later, a correction is added beside the earlier version, and nothing is overwritten.",
-    waysEyebrow: "Three ways in",
+    waysEyebrow: "Start with the example, then add your own",
     s1: "Tell · Gather つどい", h1: "Add a memory", d1: "Say what it is about and start talking. Gather writes down what you say, sorts it, and asks for what is missing. You check everything before it is saved.", g1: "Open Gather →",
     s2: "Look", h2: "The collection", d2: "Every envelope so far in one grid. Open one to see its pictures and 3D captures beside what has been told, in English or Japanese.", g2: "Open the collection →",
-    s3: "Deep example", h3: "Omusha 1808", d3: "One envelope taken deep: the Hokkaido Museum's diorama of an 1808 ceremony at Kushun Kotan, Sakhalin. Walk around it in 3D, tap a figure, and ask. It answers only from its record.", g3: "Open the diorama →",
+    s3: "Highlighted example", h3: "Omusha 1808", d3: "One envelope taken deep: the Hokkaido Museum's diorama of an 1808 ceremony at Kushun Kotan, Sakhalin. Walk around it in 3D, tap a figure, and ask. It answers only from its record.", g3: "Open the diorama →",
     a1h: "Why", a1p: "In Hokkaido, what people know about their places and things is held by a few ageing people. When they go, it goes. Museum displays have the opposite problem: one fixed telling that looks like fact.",
     a2h: "How", a2p: "You speak; ElevenLabs transcribes; Gemini sorts what you said into separate observations and asks what is still missing. Voices that answer questions use only what is in the record, and say so when it has nothing.",
     a3h: "Who", a3p: "Built at Hack Hokkaido Build Week in Sapporo, November 2026. The code is open under the MIT licence. The museum diorama is shown here as a demonstration.",
@@ -184,10 +198,10 @@ const S = {
     kindsLbl: "つつみになるもの",
     kinds: ["大きなもの", "小さなもの", "新しいもの", "古いもの", "ある場所の記憶", "ある人の記憶", "形見", "部屋", "建物", "集落", "博物館の展示", "一枚の写真", "料理の作り方", "祭り", "仕事場", "旅", "歌", "忘れられない一日"],
     grow: "つつみは育っていきます。あとから語り足すことができ、訂正は前の記録のとなりに加わります。上書きはしません。",
-    waysEyebrow: "三つの入口",
+    waysEyebrow: "まず例を見て、それから自分でも",
     s1: "語る · つどい Gather", h1: "記憶を加える", d1: "何についてかを言って、そのまま話してください。「つどい」が書き起こし、整理し、足りないことをたずねます。保存の前にすべて確認できます。", g1: "つどいを開く →",
     s2: "見る", h2: "あつめたもの", d2: "これまでのつつみを一覧で。開くと、写真や3Dと、語られたことを並べて見られます。日本語と英語を切り替えられます。", g2: "一覧を開く →",
-    s3: "作りこんだ例", h3: "オムシャ 1808", d3: "ひとつのつつみを深く整えた例です。北海道博物館のジオラマ（1808年、樺太・久春古丹でのオムシャ）を3Dで見てまわり、人物にふれて質問できます。記録にあることだけを答えます。", g3: "ジオラマを開く →",
+    s3: "注目の例", h3: "オムシャ 1808", d3: "ひとつのつつみを深く整えた例です。北海道博物館のジオラマ（1808年、樺太・久春古丹でのオムシャ）を3Dで見てまわり、人物にふれて質問できます。記録にあることだけを答えます。", g3: "ジオラマを開く →",
     a1h: "なぜ", a1p: "北海道では、場所やものについての知識を、少数の高齢の方が抱えています。その方がいなくなると、知識も失われます。博物館の展示には逆の問題があり、ひとつの語りが事実のように見えてしまいます。",
     a2h: "しくみ", a2p: "話すと、ElevenLabs が書き起こし、Gemini が語られたことを一つずつの記録に分け、足りないことをたずねます。質問に答える声は記録にあることだけを使い、記録にないときはそう伝えます。",
     a3h: "だれが", a3p: "Hack Hokkaido Build Week（札幌、2026年11月）で制作。コードはMITライセンスで公開しています。博物館のジオラマはデモとして掲載しています。",
