@@ -38,6 +38,7 @@
   .hero .ja { font: 700 clamp(22px, 3.2vw, 30px)/1.2 "Zen Maru Gothic", sans-serif; color: var(--evidence); letter-spacing: .04em; }
   html[lang=ja] .hero h1 { font-size: clamp(34px, 5.4vw, 52px); letter-spacing: .03em; }
   html[lang=ja] .hero .ja { font-family: "Nunito", sans-serif; letter-spacing: 0; }
+  .titlefilm { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 16px; display: block; background: #e9a77c; }
   .hero .lead { font-size: 18px; }
   .hero .more { color: var(--soft); font-size: 15.5px; }
   .art { position: relative; min-height: 300px; background: linear-gradient(160deg, var(--evidence-b), var(--form-b) 55%, var(--voice-b)); display: grid; place-items: center; }
@@ -122,6 +123,7 @@
       <span class="eyebrow" data-t="eyebrow"></span>
       <h1 class="pen" data-t="title"></h1>
       <div class="ja" data-t="titleOther"></div>
+      <video class="titlefilm" src="gather/media/title-sequence.mp4" poster="gather/media/title-sequence.jpg" autoplay loop muted playsinline preload="auto" aria-hidden="true"></video>
       <p class="lead" data-t="lead"></p>
       <p class="more" data-t="more"></p>
     </div>

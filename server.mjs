@@ -23,7 +23,7 @@ const PUBLIC_DIRS = ['src', 'characters', 'sample', 'gather'];
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.md': 'text/markdown; charset=utf-8',
-  '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.woff2': 'font/woff2',
+  '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.mp4': 'video/mp4',
   '.glb': 'model/gltf-binary', '.sog': 'application/octet-stream', '.spz': 'application/octet-stream',
   '.ply': 'application/octet-stream', '.splat': 'application/octet-stream', '.ksplat': 'application/octet-stream',
 };
@@ -457,9 +457,17 @@ function safeJoin(base, rel) {
   return p.startsWith(base + path.sep) || p === base ? p : null;
 }
 
-function sendFile(res, file, cache) {
+function sendFile(res, file, cache, req) {
   fs.stat(file, (err, st) => {
     if (err || !st.isFile()) { res.writeHead(404, { 'content-type': 'text/plain' }); return res.end('Not found'); }
+    // Byte ranges, which Safari needs before it will play a video
+    const m = /^bytes=(\d*)-(\d*)$/.exec(req?.headers.range || '');
+    if (m && (m[1] || m[2])) {
+      const start = m[1] ? Number(m[1]) : Math.max(0, st.size - Number(m[2])), end = m[1] && m[2] ? Math.min(Number(m[2]), st.size - 1) : st.size - 1;
+      if (start > end || start >= st.size) { res.writeHead(416, { 'content-range': `bytes */${st.size}` }); return res.end(); }
+      res.writeHead(206, { 'content-type': mimeOf(file), 'content-length': end - start + 1, 'content-range': `bytes ${start}-${end}/${st.size}`, 'accept-ranges': 'bytes', 'cache-control': cache });
+      return fs.createReadStream(file, { start, end }).pipe(res);
+    }
     res.writeHead(200, { 'content-type': mimeOf(file), 'content-length': st.size, 'cache-control': cache });
     fs.createReadStream(file).pipe(res);
   });
@@ -520,7 +528,7 @@ const server = http.createServer(async (req, res) => {
   let file = safeJoin(ROOT, pathname.slice(1));
   if (!file) { res.writeHead(400); return res.end(); }
   if (pathname.endsWith('/')) file = path.join(file, 'index.html');
-  sendFile(res, file, 'no-cache');
+  sendFile(res, file, /\.(mp4|woff2)$/.test(file) ? 'public, max-age=3600' : 'no-cache', req);
 });
 
 server.listen(PORT, () => {
