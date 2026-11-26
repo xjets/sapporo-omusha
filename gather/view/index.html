@@ -105,22 +105,26 @@ const S = {
     empty: "Nothing has been gathered yet.", emptyPublic: "Nothing here is public yet.", back: "All items", loading: "Loading…", told: (n) => `${n} told`, noPicture: "",
     versions: "Ways to see it", noForms: "No picture, scan or model yet.", descriptions: "What has been told", noObs: "Nothing has been told yet.", noObsPublic: "Nothing told here is public.",
     shown: "Shown in", original: "As told", translated: (l) => (l === "ja" ? "Japanese" : "English"), machine: "machine translation", unknown: "Unknown", earlier: (n) => `corrected ${n}×`, download: "Download the file", cannotShow: "This file type cannot be shown here yet.",
+    openDiorama: "Open the interactive diorama", dioramaPlace: "Hokkaido Museum, Sapporo", dioramaKind: "museum diorama", featured: "museum partner example",
     splatLoading: "Loading the 3D capture…", splatFail: "The 3D capture could not be shown on this device.",
     form: { photo: "Photograph", splat: "3D capture (splat)", scan: "Scanned model", reconstruction: "Placeholder model" }, basis: { recorded: "Recorded ●●●", symbolic: "Symbolic ●○○" },
     basisNote: { recorded: "captured from the real thing", symbolic: "AI-made stand-in, not a record" },
     v: { keepsake: "keepsake or object", made: "when it was made", lived: "when it was in use", observed: "since then", present: "now", "later-account": "remembered and told", "physical-trace": "can still be seen",
+      "depicted-1808": "1808, the scene shown", "made-1971": "1971, when the diorama was made", "present-2026": "2026, now", diorama: "museum diorama",
       "contemporary-document": "document from the time", inference: "a guess", witness: "saw or lived it", descendant: "family, heard at home", contributor: "heard from others", "community-authority": "speaks for the community",
       "never-collected": "nobody asked", lost: "no one left who knows", restricted: "not to be shared widely", team: "project team", family: "family only", community: "community", public: "public" } },
   ja: { title: "あつめたもの", subtitle: "場所やもの、そして人びとが語ってくれたこと。", add: "新しく加える", publicOn: "一般公開の表示", publicOff: "すべて（チーム）",
     empty: "まだ何も集まっていません。", emptyPublic: "一般公開のものはまだありません。", back: "一覧へ", loading: "読み込み中…", told: (n) => `お話 ${n}件`, noPicture: "",
     versions: "見かた", noForms: "写真・スキャン・モデルはまだありません。", descriptions: "語られたこと", noObs: "まだ何も語られていません。", noObsPublic: "一般公開のお話はありません。",
     shown: "表示", original: "語られたまま", translated: (l) => (l === "ja" ? "日本語" : "英語"), machine: "機械翻訳", unknown: "不明", earlier: (n) => `訂正 ${n}回`, download: "ファイルをダウンロード", cannotShow: "この形式はまだここで表示できません。",
+    openDiorama: "ジオラマを操作して見る", dioramaPlace: "北海道博物館（札幌）", dioramaKind: "博物館のジオラマ", featured: "博物館との連携例",
     splatLoading: "3Dキャプチャを読み込み中…", splatFail: "この端末では3Dキャプチャを表示できませんでした。",
     form: { photo: "写真", splat: "3Dキャプチャ（スプラット）", scan: "スキャンしたモデル", reconstruction: "仮のモデル" }, basis: { recorded: "実写 ●●●", symbolic: "象徴 ●○○" },
     basisNote: { recorded: "実物から記録したもの", symbolic: "AIで作った代役。記録ではありません" },
     v: { keepsake: "形見・品物", room: "部屋", building: "建物", neighborhood: "地区", village: "集落", place: "場所", institution: "施設",
       event: "出来事", use: "使い方", making: "作り方", meaning: "意味", inheritance: "受け継ぎ", contact: "出会い", appearance: "見た目", absence: "欠落",
       made: "作られた時", lived: "使われていた時", observed: "その後", present: "いま",
+      "depicted-1808": "1808年・描かれた場面", "made-1971": "1971年・ジオラマ制作", "present-2026": "2026年・いま", diorama: "博物館のジオラマ",
       "contemporary-document": "当時の資料", "later-account": "後の語り", "physical-trace": "残る跡", inference: "推測", none: "なし",
       witness: "見た・経験した人", maker: "作った人", descendant: "子孫・家族", "community-authority": "地域の代表", scholar: "研究者", curator: "学芸員", contributor: "聞いた話", passerby: "通りがかり",
       "never-collected": "聞かれなかった", destroyed: "壊された・捨てられた", suppressed: "やめさせられた", restricted: "広めない", lost: "知る人がいない",
@@ -132,10 +136,30 @@ if (LANG !== "ja" && LANG !== "en") LANG = navigator.language?.startsWith("ja") 
 let PUBLIC = params.has("public"), ORIGINAL = false, list = [], data = null, formIndex = 0, splat = null;
 const t = (k) => S[LANG][k];
 const label = (v) => S[LANG].v[v] || String(v || "").replace(/-/g, " ");
-const SEAL = { keepsake: "品", room: "間", building: "家", neighborhood: "町", village: "村", place: "場", institution: "館" };
-const LAYER = { keepsake: "actors", room: "time", building: "form", neighborhood: "types", village: "types", place: "voice", institution: "evidence" };
+const SEAL = { keepsake: "品", room: "間", building: "家", neighborhood: "町", village: "村", place: "場", institution: "館", diorama: "館" };
+const LAYER = { keepsake: "actors", room: "time", building: "form", neighborhood: "types", village: "types", place: "voice", institution: "evidence", diorama: "evidence" };
 const nameOf = (e) => (e.tr && !ORIGINAL ? e.tr.name : e.name), placeOf = (e) => (e.tr && !ORIGINAL ? e.tr.place : e.place);
 const chip = (box, text, layer, solid) => { const c = el("span", `chip${solid ? " solid" : ""}`, text); if (layer) c.dataset.layer = layer; box.append(c); };
+
+const DIORAMA = "omusha-diorama";
+async function loadDiorama() {
+  const get = async (u) => { const r = await fetch(u); if (!r.ok) throw new Error(u); return r.json(); };
+  const [index, obs] = await Promise.all([get("/api/envelopes"), get(`/api/observations?lang=${LANG}`)]);
+  const env = index.envelopes.find((e) => e.id === DIORAMA);
+  const other = LANG === "ja" ? "en" : "ja"; // the record is written in English; Japanese is a machine translation kept beside it
+  const forms = (index.forms || []).filter((x) => x.src && (x.kind === "splat" || x.kind === "reconstruction")).map((x) => ({
+    id: x.id, kind: x.kind, basis: x.basis, url: x.src.replace(/^\.\./, ""), name: x.src.split("/").pop(), title: x.kind === "reconstruction" ? (LANG === "ja" ? "人物（AI再構成）" : "Figure (AI reconstruction)") : x.label?.[LANG] || x.label?.en,
+    caption: x.unseen?.[LANG] || "", captured: { date: x.captured?.date }, protocol: { audience: "public" } }));
+  const current = obs.filter((o) => !obs.some((x) => x.supersedes === o.id));
+  return {
+    envelope: { id: DIORAMA, name: LANG === "ja" ? env.name.en : env.name.ja, tr: { name: env.name[LANG], place: t("dioramaPlace") }, place: t("dioramaPlace"), scale: "diorama", audience: "public", featured: true, noOriginal: true },
+    forms,
+    observations: current.map((o) => {
+      let earlier = 0; for (let p = o; p?.supersedes; p = obs.find((y) => y.id === p.supersedes)) earlier++;
+      return { ...o, earlier, tr: LANG === "ja" && o.ja?.claim ? { claim: o.ja.claim, when: "", note: o.ja.note || "", actors: [] } : null };
+    }),
+  };
+}
 
 function chrome() {
   document.documentElement.lang = LANG;
@@ -149,6 +173,11 @@ async function showGrid() {
   stopSplat(); data = null;
   const main = $("main"); main.innerHTML = ""; main.append(el("div", "muted", t("loading")));
   list = await api(`gallery?lang=${LANG}`);
+  try {
+    const d = await loadDiorama();
+    list.unshift({ id: DIORAMA, name: d.envelope.tr.name, place: d.envelope.place, scale: "diorama", audience: "public", featured: true, tr: null,
+      observations: d.observations.length, publicObservations: d.observations.filter((o) => o.protocol?.audience === "public").length, thumb: "", thumbPublic: "", forms: [...new Set(d.forms.map((x) => x.kind))] });
+  } catch { /* the diorama record is not on this server */ }
   main.innerHTML = "";
   const items = list.filter((e) => !PUBLIC || e.audience === "public" || e.publicObservations);
   if (!items.length) { main.append(el("div", "empty", PUBLIC ? t("emptyPublic") : t("empty"))); return; }
@@ -163,6 +192,7 @@ async function showGrid() {
     const n = PUBLIC ? e.publicObservations : e.observations; if (n) chip(chips, t("told")(n), "time", true);
     for (const k of e.forms) chip(chips, t("form")[k], "form");
     if (!PUBLIC) chip(chips, label(e.audience), "protocol", true);
+    if (e.featured) chip(chips, t("featured"), "evidence", true);
     body.append(chips); tile.append(pic, body);
     tile.addEventListener("click", () => { location.hash = e.id; });
     grid.append(tile);
@@ -174,7 +204,7 @@ async function showGrid() {
 async function showItem(id) {
   stopSplat();
   const main = $("main"); main.innerHTML = ""; main.append(el("div", "muted", t("loading")));
-  try { data = await api(`item?id=${encodeURIComponent(id)}&lang=${LANG}`); } catch { location.hash = ""; return; }
+  try { data = id === DIORAMA ? await loadDiorama() : await api(`item?id=${encodeURIComponent(id)}&lang=${LANG}`); } catch { location.hash = ""; return; }
   formIndex = 0; renderItem();
 }
 function renderItem() {
@@ -183,7 +213,7 @@ function renderItem() {
   const e = data.envelope;
   const forms = data.forms.filter((f) => !PUBLIC || f.protocol?.audience === "public");
   const obs = data.observations.filter((o) => !PUBLIC || o.protocol?.audience === "public");
-  const hasOther = !!e.tr || obs.some((o) => o.tr) || forms.some((f) => f.tr);
+  const hasOther = e.noOriginal ? obs.some((o) => o.tr) : (!!e.tr || obs.some((o) => o.tr) || forms.some((f) => f.tr));
 
   const bar = el("div", ""); bar.style.cssText = "display:flex;gap:10px;align-items:center;flex-wrap:wrap";
   const back = el("button", "", `← ${t("back")}`); back.addEventListener("click", () => { location.hash = ""; }); bar.append(back);
@@ -199,7 +229,8 @@ function renderItem() {
   const wrap = el("div", "item");
   // Left: the object, in each of its versions
   const left = el("section", "card"); left.dataset.layer = "form";
-  left.append(el("h2", "pen", nameOf(e)), el("div", "muted", [label(e.scale), placeOf(e)].filter(Boolean).join(" · ")));
+  left.append(el("h2", "pen", e.noOriginal ? e.tr.name : nameOf(e)), el("div", "muted", [label(e.scale), e.noOriginal ? e.place : placeOf(e)].filter(Boolean).join(" · ")));
+  if (e.featured) { const a = el("a", "btn", `${t("openDiorama")} →`); a.href = `/src/?lang=${LANG}`; a.style.justifySelf = "start"; left.append(a); }
   const stage = el("div", "stage"); left.append(stage);
   if (!forms.length) stage.append(el("div", "msg", t("noForms")));
   else {
@@ -210,7 +241,7 @@ function renderItem() {
     forms.forEach((f, i) => {
       count[f.kind] = (count[f.kind] || 0) + 1;
       const b = el("button", ""); b.dataset.layer = f.basis === "symbolic" ? "evidence" : "types"; b.setAttribute("aria-pressed", String(i === formIndex));
-      b.append(el("span", "", `${t("form")[f.kind]}${forms.filter((x) => x.kind === f.kind).length > 1 ? ` ${count[f.kind]}` : ""}`), el("small", "", t("basis")[f.basis]));
+      b.append(el("span", "", `${f.title || t("form")[f.kind]}${forms.filter((x) => x.kind === f.kind).length > 1 ? ` ${count[f.kind]}` : ""}`), el("small", "", t("basis")[f.basis]));
       b.addEventListener("click", () => { formIndex = i; renderItem(); });
       vs.append(b);
     });
@@ -220,7 +251,7 @@ function renderItem() {
   const right = el("section", "card"); right.dataset.layer = "time";
   right.append(el("h3", "", t("descriptions")));
   if (!obs.length) right.append(el("div", "muted", PUBLIC ? t("noObsPublic") : t("noObs")));
-  for (const st of ["made", "lived", "observed", "present"]) {
+  for (const st of ["depicted-1808", "made-1971", "made", "lived", "observed", "present", "present-2026"]) {
     const items = obs.filter((o) => o.stratum === st).sort((a, b) => (a.kind === "absence") - (b.kind === "absence"));
     if (!items.length) continue;
     const h = el("h3", "", label(st)); h.dataset.layer = "time"; right.append(h);
@@ -245,7 +276,7 @@ function renderItem() {
 
 // ---------- The versions of the object
 function showForm(stage, f) {
-  const url = `/api/gather/file/${f.file}`, ext = f.file.split(".").pop().toLowerCase();
+  const url = f.url || `/api/gather/file/${f.file}`, ext = url.split(".").pop().toLowerCase();
   if (f.kind === "photo") { const img = el("img"); img.src = url; img.alt = f.caption || ""; stage.append(img); }
   else if (ext === "glb") { const mv = document.createElement("model-viewer"); mv.setAttribute("src", url); mv.setAttribute("camera-controls", ""); mv.setAttribute("auto-rotate", ""); mv.setAttribute("shadow-intensity", "0.6"); mv.setAttribute("exposure", "1.05"); stage.append(mv); }
   else if (f.kind === "splat") startSplat(stage, url);
