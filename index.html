@@ -42,6 +42,34 @@
   .hero .more { color: var(--soft); font-size: 15.5px; }
   .art { position: relative; min-height: 300px; background: linear-gradient(160deg, var(--evidence-b), var(--form-b) 55%, var(--voice-b)); display: grid; place-items: center; }
   .art svg { width: min(88%, 380px); height: auto; }
+  /* the looping envelopes: plain line drawings, one cycle every nine seconds */
+  .loop .ln { fill: #fff; stroke: var(--evidence); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  .loop .dot { fill: var(--actors); }
+  .loop .envA { transform: translate(190px, 62px) scale(.5); animation: envA 9s infinite; }
+  .loop .envB { transform: translate(190px, 204px); animation: envB 9s infinite; }
+  .loop .flapBack { transform: translateY(-72px) scaleY(-1) translateY(72px); animation: flapBack 9s infinite; }
+  .loop .flapFront { transform: translateY(-72px) scaleY(0) translateY(72px); animation: flapFront 9s infinite; }
+  .loop .sealB { opacity: 0; animation: sealB 9s infinite; }
+  @keyframes envA {
+    0%, 34% { transform: translate(190px, 62px) scale(.5); opacity: 1; animation-timing-function: cubic-bezier(.5, 0, .3, 1); }
+    52%, 70% { transform: translate(190px, 214px) scale(.5); opacity: 1; }
+    70.1%, 100% { transform: translate(190px, 214px) scale(.5); opacity: 0; }
+  }
+  @keyframes envB {
+    0%, 8% { transform: translate(190px, 420px) scale(1); animation-timing-function: cubic-bezier(.2, .7, .3, 1); }
+    28%, 74% { transform: translate(190px, 204px) scale(1); animation-timing-function: cubic-bezier(.5, 0, .3, 1); }
+    94%, 100% { transform: translate(190px, 62px) scale(.5); }
+  }
+  @keyframes flapBack {
+    0%, 54% { transform: translateY(-72px) scaleY(-1) translateY(72px); animation-timing-function: ease-in; }
+    61%, 100% { transform: translateY(-72px) scaleY(0) translateY(72px); }
+  }
+  @keyframes flapFront {
+    0%, 61% { transform: translateY(-72px) scaleY(0) translateY(72px); animation-timing-function: ease-out; }
+    68%, 100% { transform: translateY(-72px) scaleY(1) translateY(72px); }
+  }
+  @keyframes sealB { 0%, 68% { opacity: 0; } 72%, 100% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .loop * { animation: none !important; } }
   .art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .art figcaption { position: absolute; left: 14px; bottom: 12px; font-size: 12.5px; color: var(--protocol); background: rgba(255, 255, 255, .78); padding: 3px 10px; border-radius: 999px; }
 
@@ -95,15 +123,26 @@
     </div>
     <!-- Space for graphic work. To use a picture instead of the drawing, put <img src="…" alt=""> inside this figure. -->
     <figure class="art" style="margin:0">
-      <svg viewBox="0 0 380 300" fill="none" aria-hidden="true">
-        <rect x="26" y="34" width="328" height="232" rx="26" fill="#fff" fill-opacity=".55" stroke="#5f5189" stroke-opacity=".5" stroke-width="2"/>
-        <path d="M30 60 L190 168 L350 60" stroke="#5f5189" stroke-opacity=".35" stroke-width="2"/>
-        <rect x="70" y="92" width="240" height="150" rx="20" fill="#fff" fill-opacity=".7" stroke="#45618a" stroke-opacity=".55" stroke-width="2"/>
-        <path d="M74 112 L190 188 L306 112" stroke="#45618a" stroke-opacity=".4" stroke-width="2"/>
-        <rect x="120" y="140" width="140" height="86" rx="14" fill="#fff" stroke="#3b6f6b" stroke-opacity=".7" stroke-width="2"/>
-        <path d="M123 154 L190 196 L257 154" stroke="#3b6f6b" stroke-opacity=".55" stroke-width="2"/>
-        <circle cx="190" cy="200" r="13" fill="#94544e" fill-opacity=".85"/>
-        <text x="190" y="205.500" text-anchor="middle" font-family="Zen Maru Gothic, sans-serif" font-weight="700" font-size="14" fill="#fff">声</text>
+      <!-- A sealed envelope waits at the top; an open one rises, takes it in, seals, and rises to wait in its place. Then again. -->
+      <svg class="loop" viewBox="0 0 380 300" fill="none" aria-hidden="true">
+        <defs>
+          <path id="envBody" d="M-98,-73 H98 Q110,-73 110,-61 V61 Q110,73 98,73 H-98 Q-110,73 -110,61 V-61 Q-110,-73 -98,-73 Z"/>
+          <path id="envPocket" d="M-110,-64 L0,12 L110,-64 V61 Q110,73 98,73 H-98 Q-110,73 -110,61 Z"/>
+          <path id="envFlap" d="M-106,-72 L0,12 L106,-72 Z"/>
+        </defs>
+        <g class="envB">
+          <use href="#envBody" class="ln"/>
+          <g class="flapBack"><use href="#envFlap" class="ln"/></g>
+        </g>
+        <g class="envA">
+          <use href="#envBody" class="ln"/><use href="#envPocket" class="ln"/><use href="#envFlap" class="ln"/>
+          <circle cx="0" cy="12" r="10" class="dot"/>
+        </g>
+        <g class="envB">
+          <use href="#envPocket" class="ln"/>
+          <g class="flapFront"><use href="#envFlap" class="ln"/></g>
+          <circle cx="0" cy="12" r="10" class="dot sealB"/>
+        </g>
       </svg>
       <figcaption data-t="artCap"></figcaption>
     </figure>
