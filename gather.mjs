@@ -143,6 +143,50 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
     return { status: 200, data: { observations: tidy, next: parsed.next, missing: list } };
   }
 
+  // ---- Intake: a person says what it is and who they are; this fills the form fields from their words
+  const INTAKE_RULES = [
+    'A person is starting to record a memory about a place or a thing, and has just spoken. From the transcript, pick out only these details, and only when they were actually said. Never guess. Use "unknown" or an empty string for anything not said.',
+    '- name: what they call the place or thing, short, as they said it ("the old net shed"). Keep the language they spoke. No town name in it unless it is part of the name.',
+    '- scale: keepsake (an object you can hold or keep), room, building, neighborhood, village, place (outdoor spot, landscape, street), institution (school, shrine, shop, company), or unknown.',
+    '- place: the town or place where it is, as said.',
+    '- speakerName: their own name, only if they gave it. declinedName: true if they said they would rather not give a name.',
+    '- role: how they know about it: witness (saw, used or lived it themselves), maker (made or built it), descendant (heard it in their family), community-authority (speaks for a community group), contributor (heard it from others), passerby (knows only a little), or unknown.',
+    '- audience: who may see what they tell, only if they said: family, community, team (the project staff), public (anyone), or unknown.',
+    '- story: true if they also told memories or facts about it beyond these details.',
+    'ASKED is the question they were just asked, and HAVE is what is already filled in. A short reply is the answer to ASKED and nothing else: after "Where is it?", "down by the harbour in Yoichi" is the place, not a new name. Return a detail that is already in HAVE only when the person is plainly correcting it; otherwise leave it empty or unknown. Give role only when they say how they know about it, not from a word like "my grandfather’s" in the name.',
+  ].join('\n');
+  const withUnknown = (list) => [...list, 'unknown'];
+  const INTAKE_SCHEMA = { type: 'OBJECT', properties: {
+    name: { type: 'STRING' }, scale: { type: 'STRING', enum: withUnknown(GATHER_ENUMS.scale) }, place: { type: 'STRING' },
+    speakerName: { type: 'STRING' }, declinedName: { type: 'BOOLEAN' }, role: { type: 'STRING', enum: withUnknown(GATHER_ENUMS.role) },
+    audience: { type: 'STRING', enum: withUnknown(GATHER_ENUMS.audience) }, story: { type: 'BOOLEAN' },
+  }, required: ['name', 'scale', 'place', 'speakerName', 'role', 'audience', 'story'], propertyOrdering: ['name', 'scale', 'place', 'speakerName', 'declinedName', 'role', 'audience', 'story'] };
+  async function intake(body) {
+    const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    if (!key) return { status: 503, data: { error: 'The assistant is not set up on this server (GEMINI_API_KEY is missing).' } };
+    const transcript = s(body.transcript, 4000);
+    if (!transcript) return { status: 400, data: { error: 'Nothing was heard.' } };
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${process.env.GATHER_MODEL || process.env.GEMINI_MODEL || 'gemini-3.5-flash'}:generateContent`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: INTAKE_RULES }] },
+        contents: [{ role: 'user', parts: [{ text: JSON.stringify({ ASKED: s(body.asked, 300), HAVE: body.have && typeof body.have === 'object' ? Object.fromEntries(Object.entries(body.have).slice(0, 8).map(([k, v]) => [s(k, 20), s(v, 160)])) : {}, transcript }) }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 600, responseMimeType: 'application/json', responseSchema: INTAKE_SCHEMA, thinkingConfig: { thinkingLevel: process.env.GATHER_THINKING || 'minimal' } },
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!res.ok) { console.error('gather intake', res.status, (await res.text()).slice(0, 300)); return { status: 502, data: { error: 'Could not read that just now. You can type it in below.' } }; }
+    let p;
+    try { p = JSON.parse((await res.json()).candidates?.[0]?.content?.parts?.map((x) => x.text || '').join('') || ''); }
+    catch { return { status: 502, data: { error: 'Could not read that just now. You can type it in below.' } }; }
+    const known = (v, list) => (list.includes(v) ? v : '');
+    return { status: 200, data: {
+      name: s(p.name, 160), scale: known(p.scale, GATHER_ENUMS.scale), place: s(p.place, 160),
+      speakerName: s(p.speakerName, 120), declinedName: p.declinedName === true, role: known(p.role, GATHER_ENUMS.role),
+      audience: known(p.audience, GATHER_ENUMS.audience), story: p.story === true } };
+  }
+
   function cleanObservation(o, session, existing) {
     const errors = [];
     const out = {
@@ -228,6 +272,10 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
       const observations = (await rows(KEYS.observations)).filter((o) => o.envelope === id);
       const forms = (await rows(KEYS.forms)).filter((f) => f.envelope === id);
       return sendJson(res, 200, { envelope, observations, forms, missing: missing(observations, forms).list });
+    }
+    if (route === 'intake' && req.method === 'POST') {
+      const { status, data } = await intake(await readJson(req, 20000));
+      return sendJson(res, status, data);
     }
     if (route === 'interview' && req.method === 'POST') {
       const { status, data } = await interview(await readJson(req, 40000));
