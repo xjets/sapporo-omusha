@@ -105,7 +105,7 @@ translated. "Public view" shows only what is marked public.
 
 **Admin.** Open `/gather/view/?admin` and give the upload token (`UPLOAD_TOKEN`). An admin can remove an
 item from the collection (a removal is one more line in the record, so nothing is erased and it can be
-undone by hand) and can save the current 3D view of the diorama as its tile picture.
+undone by hand) and, for any item with a 3D capture, can save the current view as its tile picture and as the view it opens from.
 
 A strip of eight seals shows which layers the envelope has so far. Audio is not kept. Rules and
 storage are in [gather.mjs](gather.mjs); the page is [gather/index.html](gather/index.html).

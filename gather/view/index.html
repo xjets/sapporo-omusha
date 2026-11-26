@@ -139,6 +139,8 @@ const ADMIN = params.has("admin");
 let TOKEN = "";
 if (ADMIN) { try { TOKEN = sessionStorage.getItem("gather.admin") || ""; } catch {} if (!TOKEN) { TOKEN = prompt("Admin token") || ""; try { sessionStorage.setItem("gather.admin", TOKEN); } catch {} } }
 const admin = (path, opts = {}) => fetch(`/api/gather/admin/${path}`, { ...opts, headers: { ...(opts.headers || {}), "x-upload-token": TOKEN } });
+let SHOW = { views: {}, thumbs: {} }; // admin-set opening views and tile pictures
+const loadShow = async () => { try { SHOW = await (await fetch("/api/gather/show", { cache: "no-store" })).json(); } catch { /* older server */ } };
 let PUBLIC = params.has("public"), ORIGINAL = false, list = [], data = null, formIndex = 0, splat = null;
 const t = (k) => S[LANG][k];
 const label = (v) => S[LANG].v[v] || String(v || "").replace(/-/g, " ");
@@ -178,11 +180,12 @@ function chrome() {
 async function showGrid() {
   stopSplat(); data = null;
   const main = $("main"); main.innerHTML = ""; main.append(el("div", "muted", t("loading")));
+  await loadShow();
   list = await api(`gallery?lang=${LANG}`);
   try {
     const d = await loadDiorama();
     list.unshift({ id: DIORAMA, name: d.envelope.tr.name, place: d.envelope.place, scale: "diorama", audience: "public", featured: true, tr: null,
-      observations: d.observations.length, publicObservations: d.observations.filter((o) => o.protocol?.audience === "public").length, thumb: "", thumbPublic: "", thumbUrl: `/api/gather/thumb?id=${DIORAMA}`, forms: [...new Set(d.forms.map((x) => x.kind))] });
+      observations: d.observations.length, publicObservations: d.observations.filter((o) => o.protocol?.audience === "public").length, thumb: "", thumbPublic: "", forms: [...new Set(d.forms.map((x) => x.kind))] });
   } catch { /* the diorama record is not on this server */ }
   main.innerHTML = "";
   const items = list.filter((e) => !PUBLIC || e.audience === "public" || e.publicObservations);
@@ -191,6 +194,7 @@ async function showGrid() {
   for (const e of items) {
     const tile = el("button", "tile"); tile.dataset.layer = LAYER[e.scale] || "form";
     const pic = el("div", "pic"), thumb = PUBLIC ? e.thumbPublic : e.thumb;
+    e.thumbUrl = SHOW.thumbs[e.id] ? `/api/gather/thumb?id=${e.id}&v=${SHOW.thumbs[e.id]}` : "";
     if (thumb || e.thumbUrl) { const img = el("img"); img.src = e.thumbUrl || `/api/gather/file/${thumb}`; img.alt = ""; img.loading = "lazy"; img.onerror = () => { img.remove(); pic.textContent = SEAL[e.scale] || "物"; }; pic.append(img); } else pic.textContent = SEAL[e.scale] || "物";
     const body = el("div", "body");
     body.append(el("h3", "pen", nameOf(e)), el("div", "sub", [label(e.scale), placeOf(e)].filter(Boolean).join(" · ")));
@@ -210,6 +214,7 @@ async function showGrid() {
 async function showItem(id) {
   stopSplat();
   const main = $("main"); main.innerHTML = ""; main.append(el("div", "muted", t("loading")));
+  await loadShow();
   try { data = id === DIORAMA ? await loadDiorama() : await api(`item?id=${encodeURIComponent(id)}&lang=${LANG}`); } catch { location.hash = ""; return; }
   formIndex = 0; renderItem();
 }
@@ -238,17 +243,22 @@ function renderItem() {
   left.append(el("h2", "pen", e.noOriginal ? e.tr.name : nameOf(e)), el("div", "muted", [label(e.scale), e.noOriginal ? e.place : placeOf(e)].filter(Boolean).join(" · ")));
   if (e.featured) { const a = el("a", "btn", `${t("openDiorama")} →`); a.href = `/src/?lang=${LANG}`; a.style.justifySelf = "start"; left.append(a); }
   if (ADMIN) {
-    const b = el("button", "btn", e.id === DIORAMA ? "Admin: use this 3D view as the tile picture" : "Admin: remove this item"); b.type = "button"; b.style.justifySelf = "start";
-    b.addEventListener("click", async () => {
-      if (e.id === DIORAMA) {
-        if (!splat?.renderer) { alert("Show the 3D capture first, and turn it to the view you want."); return; }
-        splat.want = async (blob) => { const r = await admin(`thumb?id=${DIORAMA}`, { method: "PUT", body: blob }); alert(r.ok ? "Tile picture saved. It can take up to an hour to refresh for people who already loaded it." : (await r.json()).error); };
-      } else if (confirm(`Remove "${nameOf(e)}" from the collection?`)) {
-        const r = await admin("delete", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: e.id }) });
-        if (r.ok) location.hash = ""; else alert((await r.json()).error);
-      }
+    const row = el("div", ""); row.style.cssText = "display:flex;flex-wrap:wrap;gap:8px";
+    const btn = (text, run) => { const b = el("button", "btn", text); b.type = "button"; b.addEventListener("click", run); row.append(b); };
+    const need3d = () => { if (splat?.camera) return true; alert("Show the 3D capture first, and turn it to the view you want."); return false; };
+    if (forms.some((x) => x.kind === "splat")) {
+      btn("Admin: tile picture from this view", () => { if (!need3d()) return;
+        splat.want = async (blob) => { const r = await admin(`thumb?id=${e.id}`, { method: "PUT", body: blob }); alert(r.ok ? "Tile picture saved." : (await r.json()).error); }; });
+      btn("Admin: open from this view", async () => { if (!need3d()) return;
+        const r = await admin(`view?key=${splat.key}`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ position: splat.camera.position.toArray(), target: splat.controls.target.toArray() }) });
+        alert(r.ok ? "Opening view saved." : (await r.json()).error); });
+    }
+    if (e.id !== DIORAMA) btn("Admin: remove this item", async () => {
+      if (!confirm(`Remove "${nameOf(e)}" from the collection?`)) return;
+      const r = await admin("delete", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: e.id }) });
+      if (r.ok) location.hash = ""; else alert((await r.json()).error);
     });
-    left.append(b);
+    left.append(row);
   }
   const stage = el("div", "stage"); left.append(stage);
   if (!forms.length) stage.append(el("div", "msg", t("noForms")));
@@ -298,7 +308,7 @@ function showForm(stage, f) {
   const url = f.url || `/api/gather/file/${f.file}`, ext = url.split(".").pop().toLowerCase();
   if (f.kind === "photo") { const img = el("img"); img.src = url; img.alt = f.caption || ""; stage.append(img); }
   else if (ext === "glb") { const mv = document.createElement("model-viewer"); mv.setAttribute("src", url); mv.setAttribute("camera-controls", ""); mv.setAttribute("auto-rotate", ""); mv.setAttribute("shadow-intensity", "0.6"); mv.setAttribute("exposure", "1.05"); stage.append(mv); }
-  else if (f.kind === "splat") startSplat(stage, url);
+  else if (f.kind === "splat") startSplat(stage, url, f.id);
   else { const m = el("div", "msg"); const a = el("a", "btn", t("download")); a.href = url; a.download = f.name; m.append(el("div", "", t("cannotShow")), el("div", "", " "), a); stage.append(m); }
   const note = el("div", "note");
   note.append(el("span", `basis ${f.basis}`, `${t("basis")[f.basis]} · ${t("basisNote")[f.basis]}`));
@@ -307,8 +317,8 @@ function showForm(stage, f) {
   stage.append(note);
 }
 function stopSplat() { if (!splat) return; splat.stop = true; splat.renderer?.dispose(); splat = null; }
-async function startSplat(stage, url) {
-  const mine = splat = { stop: false };
+async function startSplat(stage, url, key) {
+  const mine = splat = { stop: false, key };
   const msg = el("div", "msg", t("splatLoading")); stage.append(msg);
   try {
     const [THREE, { OrbitControls }, { SparkRenderer, SplatMesh }] = await Promise.all([import("three"), import("three/addons/controls/OrbitControls.js"), import("@sparkjsdev/spark")]);
@@ -324,6 +334,9 @@ async function startSplat(stage, url) {
     const box = mesh.getBoundingBox ? mesh.getBoundingBox() : new THREE.Box3().setFromObject(mesh);
     const centre = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3()).length() || 2;
     mesh.localToWorld(centre); controls.target.copy(centre); camera.position.copy(centre).add(new THREE.Vector3(0, size * 0.15, size * 0.6));
+    const saved = SHOW.views[key]; // an admin chose where this one opens
+    if (saved) { camera.position.fromArray(saved.position); controls.target.fromArray(saved.target); }
+    mine.camera = camera; mine.controls = controls;
     msg.remove();
     const loop = () => { if (mine.stop) return; const w = stage.clientWidth, h = stage.clientHeight;
       if (canvas.width !== Math.round(w * renderer.getPixelRatio())) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }

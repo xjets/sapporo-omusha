@@ -53,6 +53,15 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf, isAdmin = (
     return run;
   }
 
+  // What an admin has set for showing things: the opening view of a 3D capture, and when a tile picture was last made.
+  const SHOW_KEY = 'gather/show.json';
+  const showSettings = async () => { try { return { views: {}, thumbs: {}, ...JSON.parse((await readText(SHOW_KEY)) || '{}') }; } catch { return { views: {}, thumbs: {} }; } };
+  function setShow(change) {
+    const run = queue.then(async () => { const all = await showSettings(); change(all); await writeText(SHOW_KEY, JSON.stringify(all)); });
+    queue = run.catch(() => {});
+    return run;
+  }
+
   // ---- What the record still lacks, layer by layer (drives the next question)
   function missing(observations, forms) {
     const current = observations.filter((o) => !observations.some((x) => x.supersedes === o.id));
@@ -297,8 +306,8 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf, isAdmin = (
     return { errors, out };
   }
 
-  async function sendFile(res, key) {
-    const headers = { 'content-type': mimeOf(key), 'cache-control': 'private, max-age=3600' };
+  async function sendFile(res, key, cache = 'private, max-age=3600') {
+    const headers = { 'content-type': mimeOf(key), 'cache-control': cache };
     if (!s3) {
       const f = localPath(key);
       if (!f.startsWith(LOCAL + path.sep) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
@@ -387,8 +396,9 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf, isAdmin = (
     if (route === 'thumb' && req.method === 'GET') { // a tile picture made by an admin from the 3D view
       const id = q.get('id') || '';
       if (!/^[a-z0-9-]+$/.test(id)) { res.writeHead(400); return res.end(); }
-      return sendFile(res, `gather/thumbs/${id}.jpg`);
+      return sendFile(res, `gather/thumbs/${id}.jpg`, q.get('v') ? 'public, max-age=31536000, immutable' : 'no-cache');
     }
+    if (route === 'show' && req.method === 'GET') return sendJson(res, 200, await showSettings());
     if (route.startsWith('admin/')) { // needs the upload token (x-upload-token)
       if (!isAdmin(req)) return sendJson(res, 403, { error: 'Admin token required.' });
       if (route === 'admin/check' && req.method === 'GET') return sendJson(res, 200, { ok: true });
@@ -398,6 +408,13 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf, isAdmin = (
         await append(KEYS.envelopes, [{ id, deleted: true, deletedAt: new Date().toISOString() }]);
         return sendJson(res, 200, { deleted: id });
       }
+      if (route === 'admin/view' && req.method === 'PUT') { // the opening view of one 3D capture
+        const key = q.get('key') || '', b = await readJson(req);
+        const vec = (v) => Array.isArray(v) && v.length === 3 && v.every((n) => Number.isFinite(n));
+        if (!/^[a-z0-9-]+$/.test(key) || !vec(b.position) || !vec(b.target)) return sendJson(res, 400, { error: 'Send a key, a position and a target.' });
+        await setShow((all) => { all.views[key] = { position: b.position, target: b.target }; });
+        return sendJson(res, 200, { view: key });
+      }
       if (route === 'admin/thumb' && req.method === 'PUT') {
         const id = q.get('id') || '';
         if (!/^[a-z0-9-]+$/.test(id)) return sendJson(res, 400, { error: 'Bad id.' });
@@ -406,7 +423,9 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf, isAdmin = (
         const body = Buffer.concat(chunks), key = `gather/thumbs/${id}.jpg`;
         if (s3) await s3.client.send(new s3.PutObjectCommand({ Bucket: s3.bucket, Key: key, Body: body, ContentType: 'image/jpeg' }));
         else { const file = localPath(key); fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, body); }
-        return sendJson(res, 201, { thumb: id, size });
+        const at = Date.now();
+        await setShow((all) => { all.thumbs[id] = at; });
+        return sendJson(res, 201, { thumb: id, size, at });
       }
     }
     if (route.startsWith('file/') && req.method === 'GET') {
