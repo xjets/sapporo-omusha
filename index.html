@@ -4,68 +4,143 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Gather · つどい</title>
+<title>Memory Envelopes · 記憶のつつみ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
 <style>
   :root {
-    --bg: #eef1f5; --card: #ffffff; --ink: #26303b; --soft: #66717e; --line: #dde2e8; --accent: #3f5873;
-    --form: #45618a; --form-b: #dbe5f1; --evidence: #5f5189; --evidence-b: #e3ddf1; --voice: #3b6f6b; --voice-b: #d3e8e5;
-    --absence: #5c6570; --absence-b: #e2e5e9;
+    --bg: #eef1f5; --card: #ffffff; --tint: #f6f8fa; --ink: #26303b; --soft: #66717e; --line: #dde2e8; --accent: #3f5873;
+    --form: #45618a; --form-b: #dbe5f1; --time: #7a6a2c; --time-b: #ebe6c6; --actors: #94544e; --actors-b: #f1dbd8;
+    --types: #47694b; --types-b: #d9e8da; --evidence: #5f5189; --evidence-b: #e3ddf1; --absence: #5c6570; --absence-b: #e2e5e9;
+    --protocol: #3d4b57; --protocol-b: #d6dee4; --voice: #3b6f6b; --voice-b: #d3e8e5;
   }
   @font-face { font-family: "Hershey Simplex Pen"; src: url("gather/fonts/hershey-simplex-pen.woff2") format("woff2"); font-weight: 400; font-display: swap; }
   * { box-sizing: border-box; }
   body { margin: 0; color: var(--ink); background: var(--bg); font: 16px/1.6 "Nunito", "Zen Maru Gothic", "Hiragino Maru Gothic ProN", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-  .wrap { max-width: 980px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 22px; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 18px 16px 60px; display: grid; gap: 22px; grid-template-columns: minmax(0, 1fr); }
   .pen { font-family: "Hershey Simplex Pen", "Zen Maru Gothic", sans-serif; font-weight: 400; word-spacing: -.12em; -webkit-text-stroke: .35px currentColor; }
   html[lang=ja] .pen { font-weight: 700; -webkit-text-stroke: 0; }
-  header { display: flex; align-items: center; gap: 12px; }
-  .mark { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--voice-b); color: var(--voice); font: 700 24px "Zen Maru Gothic", sans-serif; flex: none; }
-  header h1 { margin: 0; font-size: 30px; line-height: 1.1; }
-  header p { margin: 0; color: var(--soft); font-size: 14px; }
-  header .sp { flex: 1; }
+  .card { background: var(--card); border-radius: 20px; box-shadow: 0 1px 2px rgba(38, 48, 59, .06); }
+  h2, h3, p { margin: 0; }
+  .eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--soft); }
+
+  /* top bar */
+  .top { display: flex; align-items: center; gap: 12px; }
+  .mark { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--evidence-b); color: var(--evidence); font: 700 23px "Zen Maru Gothic", sans-serif; flex: none; }
+  .top .name { font-weight: 800; line-height: 1.2; } .top .name small { display: block; font-weight: 600; color: var(--soft); font-size: 13px; }
+  .top .sp { flex: 1; }
   button.lang { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 8px 16px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
-  .lead { background: var(--card); border-radius: 20px; padding: 22px 24px; box-shadow: 0 1px 2px rgba(38, 48, 59, .06); }
-  .lead p { margin: 0; font-size: 17px; }
-  .lead p + p { margin-top: 10px; color: var(--soft); font-size: 15px; }
+
+  /* hero: title and introduction beside the space for graphic work */
+  .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); overflow: hidden; }
+  .hero .text { padding: 34px 32px; display: grid; gap: 14px; align-content: center; }
+  .hero h1 { margin: 0; font-size: clamp(34px, 5.4vw, 54px); line-height: 1.05; }
+  .hero .ja { font: 700 clamp(22px, 3.2vw, 30px)/1.2 "Zen Maru Gothic", sans-serif; color: var(--evidence); letter-spacing: .04em; }
+  html[lang=ja] .hero h1 { font-size: clamp(34px, 5.4vw, 52px); letter-spacing: .03em; }
+  html[lang=ja] .hero .ja { font-family: "Nunito", sans-serif; letter-spacing: 0; }
+  .hero .lead { font-size: 18px; }
+  .hero .more { color: var(--soft); font-size: 15.5px; }
+  .art { position: relative; min-height: 300px; background: linear-gradient(160deg, var(--evidence-b), var(--form-b) 55%, var(--voice-b)); display: grid; place-items: center; }
+  .art svg { width: min(88%, 380px); height: auto; }
+  .art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .art figcaption { position: absolute; left: 14px; bottom: 12px; font-size: 12.5px; color: var(--protocol); background: rgba(255, 255, 255, .78); padding: 3px 10px; border-radius: 999px; }
+
+  /* what an envelope keeps */
+  .keeps { padding: 24px 26px; display: grid; gap: 16px; }
+  .keeps .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .keep { background: var(--b); border-radius: 16px; padding: 14px 16px; display: grid; gap: 4px; }
+  .keep b { color: var(--c); font-size: 15.5px; } .keep span { font-size: 14px; color: var(--ink); opacity: .82; }
+  .k1 { --c: var(--voice); --b: var(--voice-b); } .k2 { --c: var(--actors); --b: var(--actors-b); } .k3 { --c: var(--evidence); --b: var(--evidence-b); } .k4 { --c: var(--absence); --b: var(--absence-b); }
+  .kinds { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .chip { border: 1px solid var(--line); background: var(--tint); border-radius: 999px; padding: 4px 13px; font-size: 14px; font-weight: 700; }
+  .kinds .lbl { font-size: 14px; color: var(--soft); margin-right: 4px; }
+
+  /* the three ways in */
   .paths { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); }
   a.path { display: grid; grid-template-rows: auto auto 1fr auto; gap: 10px; background: var(--card); border-radius: 20px; padding: 22px; text-decoration: none; color: inherit; border: 2px solid transparent; box-shadow: 0 1px 2px rgba(38, 48, 59, .06); transition: border-color .15s, transform .15s; }
   a.path:hover, a.path:focus-visible { border-color: var(--c); transform: translateY(-2px); outline: none; }
-  .path .top { display: flex; align-items: center; gap: 12px; }
+  .path .head { display: flex; align-items: center; gap: 12px; }
   .seal { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; background: var(--b); color: var(--c); font: 700 28px "Zen Maru Gothic", sans-serif; flex: none; }
   .step { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--c); }
-  .path h2 { margin: 0; font-size: 25px; line-height: 1.15; }
-  .path p { margin: 0; color: var(--soft); font-size: 15px; }
+  .path h3 { font-size: 25px; line-height: 1.15; }
+  .path p { color: var(--soft); font-size: 15px; }
   .go { justify-self: start; background: var(--c); color: #fff; border-radius: 999px; padding: 10px 20px; font-weight: 800; font-size: 15px; }
   .p1 { --c: var(--voice); --b: var(--voice-b); } .p2 { --c: var(--form); --b: var(--form-b); } .p3 { --c: var(--evidence); --b: var(--evidence-b); }
+
+  /* about */
+  .about { padding: 24px 26px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .about div { display: grid; gap: 6px; align-content: start; }
+  .about h3 { font-size: 16px; } .about p { font-size: 14.5px; color: var(--soft); }
   footer { color: var(--soft); font-size: 13.5px; display: grid; gap: 6px; }
   footer a { color: var(--accent); }
+  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; } .art { min-height: 220px; order: -1; } .hero .text { padding: 24px 22px; } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <span class="mark">集</span>
-    <div><h1 class="pen" data-t="title"></h1><p data-t="sub"></p></div>
+  <div class="top">
+    <span class="mark">包</span>
+    <div class="name"><span data-t="brand"></span><small data-t="brandSub"></small></div>
     <span class="sp"></span>
     <button class="lang" id="lang" type="button"></button>
-  </header>
+  </div>
 
-  <section class="lead"><p data-t="lead1"></p><p data-t="lead2"></p></section>
+  <section class="card hero">
+    <div class="text">
+      <span class="eyebrow" data-t="eyebrow"></span>
+      <h1 class="pen" data-t="title"></h1>
+      <div class="ja" data-t="titleOther"></div>
+      <p class="lead" data-t="lead"></p>
+      <p class="more" data-t="more"></p>
+    </div>
+    <!-- Space for graphic work. To use a picture instead of the drawing, put <img src="…" alt=""> inside this figure. -->
+    <figure class="art" style="margin:0">
+      <svg viewBox="0 0 380 300" fill="none" aria-hidden="true">
+        <rect x="26" y="34" width="328" height="232" rx="26" fill="#fff" fill-opacity=".55" stroke="#5f5189" stroke-opacity=".5" stroke-width="2"/>
+        <path d="M30 60 L190 168 L350 60" stroke="#5f5189" stroke-opacity=".35" stroke-width="2"/>
+        <rect x="70" y="92" width="240" height="150" rx="20" fill="#fff" fill-opacity=".7" stroke="#45618a" stroke-opacity=".55" stroke-width="2"/>
+        <path d="M74 112 L190 188 L306 112" stroke="#45618a" stroke-opacity=".4" stroke-width="2"/>
+        <rect x="120" y="140" width="140" height="86" rx="14" fill="#fff" stroke="#3b6f6b" stroke-opacity=".7" stroke-width="2"/>
+        <path d="M123 154 L190 196 L257 154" stroke="#3b6f6b" stroke-opacity=".55" stroke-width="2"/>
+        <circle cx="190" cy="200" r="13" fill="#94544e" fill-opacity=".85"/>
+        <text x="190" y="205.500" text-anchor="middle" font-family="Zen Maru Gothic, sans-serif" font-weight="700" font-size="14" fill="#fff">声</text>
+      </svg>
+      <figcaption data-t="artCap"></figcaption>
+    </figure>
+  </section>
 
+  <section class="card keeps">
+    <div><span class="eyebrow" data-t="keepsEyebrow"></span><h2 class="pen" style="font-size:26px;margin-top:2px" data-t="keepsTitle"></h2></div>
+    <div class="grid">
+      <div class="keep k1"><b data-t="k1"></b><span data-t="k1d"></span></div>
+      <div class="keep k2"><b data-t="k2"></b><span data-t="k2d"></span></div>
+      <div class="keep k3"><b data-t="k3"></b><span data-t="k3d"></span></div>
+      <div class="keep k4"><b data-t="k4"></b><span data-t="k4d"></span></div>
+    </div>
+    <div class="kinds"><span class="lbl" data-t="kindsLbl"></span><span class="chip" data-t="c1"></span><span class="chip" data-t="c2"></span><span class="chip" data-t="c3"></span><span class="chip" data-t="c4"></span><span class="chip" data-t="c5"></span></div>
+    <p style="color:var(--soft);font-size:15px" data-t="grow"></p>
+  </section>
+
+  <div><span class="eyebrow" data-t="waysEyebrow"></span></div>
   <section class="paths">
     <a class="path p1" id="a1" href="gather/">
-      <div class="top"><span class="seal">声</span><span class="step" data-t="s1"></span></div>
-      <h2 class="pen" data-t="h1"></h2><p data-t="d1"></p><span class="go" data-t="g1"></span>
+      <div class="head"><span class="seal">集</span><span class="step" data-t="s1"></span></div>
+      <h3 class="pen" data-t="h1"></h3><p data-t="d1"></p><span class="go" data-t="g1"></span>
     </a>
     <a class="path p2" id="a2" href="gather/view/">
-      <div class="top"><span class="seal">蔵</span><span class="step" data-t="s2"></span></div>
-      <h2 class="pen" data-t="h2"></h2><p data-t="d2"></p><span class="go" data-t="g2"></span>
+      <div class="head"><span class="seal">蔵</span><span class="step" data-t="s2"></span></div>
+      <h3 class="pen" data-t="h2"></h3><p data-t="d2"></p><span class="go" data-t="g2"></span>
     </a>
     <a class="path p3" id="a3" href="src/">
-      <div class="top"><span class="seal">館</span><span class="step" data-t="s3"></span></div>
-      <h2 class="pen" data-t="h3"></h2><p data-t="d3"></p><span class="go" data-t="g3"></span>
+      <div class="head"><span class="seal">館</span><span class="step" data-t="s3"></span></div>
+      <h3 class="pen" data-t="h3"></h3><p data-t="d3"></p><span class="go" data-t="g3"></span>
     </a>
+  </section>
+
+  <section class="card about">
+    <div><h3 data-t="a1h"></h3><p data-t="a1p"></p></div>
+    <div><h3 data-t="a2h"></h3><p data-t="a2p"></p></div>
+    <div><h3 data-t="a3h"></h3><p data-t="a3p"></p></div>
   </section>
 
   <footer><span data-t="f1"></span><span data-t="f2"></span><span><a href="https://github.com/xjets/sapporo-omusha" data-t="repo"></a></span></footer>
@@ -73,24 +148,52 @@
 <script>
 const S = {
   en: {
-    title: "Gather", sub: "つどい · with Omusha 1808", lang: "日本語",
-    lead1: "Gather keeps what people know about a place or a thing: their own words, who said it, how well it is supported, and what is missing.",
-    lead2: "There are three ways in. Start by telling something yourself, or go straight to the worked example: one museum diorama, recorded in depth.",
-    s1: "Tell", h1: "Record something", d1: "Say what it is about and start talking, in English or Japanese. It writes down what you say, sorts it, and asks for what is missing. You check everything before it is saved.", g1: "Open Gather →",
-    s2: "Look", h2: "The collection", d2: "Everything gathered so far in one grid, the museum diorama among it. Switch between versions of each object and between English and Japanese.", g2: "Open the collection →",
-    s3: "Deep example", h3: "Omusha 1808", d3: "The same kind of record, curated for the Hokkaido Museum's diorama of an 1808 ceremony at Kushun Kotan, Sakhalin. Walk around it in 3D, tap a figure, and ask a question. It answers only from its record.", g3: "Open the diorama →",
+    brand: "Memory Envelopes", brandSub: "記憶のつつみ", lang: "日本語",
+    eyebrow: "A place to keep what people know",
+    title: "Memory Envelopes", titleOther: "記憶のつつみ",
+    lead: "A growing collection of memories held by places and things: a family keepsake, a station platform, a village, a museum display.",
+    more: "Each one is kept in an envelope. Anyone who knows something can add to it, by voice or by typing, with photographs and 3D captures. The envelope keeps the words as they were told, who told them, and what nobody knows any more.",
+    artCap: "An envelope can hold smaller envelopes",
+    keepsEyebrow: "Inside every envelope", keepsTitle: "Four things are always kept",
+    k1: "What was told", k1d: "In the teller's own words, in English or Japanese.",
+    k2: "Who told it", k2d: "And what they are to it: family, neighbour, visitor, curator.",
+    k3: "How well it is supported", k3d: "Remembered, written down at the time, or a guess.",
+    k4: "What is missing", k4d: "What was never asked, was lost, or was not passed on, and why.",
+    kindsLbl: "An envelope can be", c1: "a keepsake", c2: "a room", c3: "a building", c4: "a place or village", c5: "a museum display",
+    grow: "Envelopes keep growing. More can be told later, a correction is added beside the earlier version, and nothing is overwritten.",
+    waysEyebrow: "Three ways in",
+    s1: "Tell · Gather つどい", h1: "Add a memory", d1: "Say what it is about and start talking. Gather writes down what you say, sorts it, and asks for what is missing. You check everything before it is saved.", g1: "Open Gather →",
+    s2: "Look", h2: "The collection", d2: "Every envelope so far in one grid. Open one to see its pictures and 3D captures beside what has been told, in English or Japanese.", g2: "Open the collection →",
+    s3: "Deep example", h3: "Omusha 1808", d3: "One envelope taken deep: the Hokkaido Museum's diorama of an 1808 ceremony at Kushun Kotan, Sakhalin. Walk around it in 3D, tap a figure, and ask. It answers only from its record.", g3: "Open the diorama →",
+    a1h: "Why", a1p: "In Hokkaido, what people know about their places and things is held by a few ageing people. When they go, it goes. Museum displays have the opposite problem: one fixed telling that looks like fact.",
+    a2h: "How", a2p: "You speak; ElevenLabs transcribes; Gemini sorts what you said into separate observations and asks what is still missing. Voices that answer questions use only what is in the record, and say so when it has nothing.",
+    a3h: "Who", a3p: "Built at Hack Hokkaido Build Week in Sapporo, November 2026. The code is open under the MIT licence. The museum diorama is shown here as a demonstration.",
     f1: "The voices and the 3D figures are synthetic interpretations, not historical records.",
-    f2: "Built at Hack Hokkaido Build Week, November 2026.", repo: "Source code (MIT)",
+    f2: "This is a demonstration. Anything added here is visible to everyone.", repo: "Source code (MIT)",
   },
   ja: {
-    title: "つどい", sub: "Gather · オムシャ1808とともに", lang: "English",
-    lead1: "「つどい」は、場所やものについて人びとが知っていることを残します。語ったことば、だれが語ったか、どれだけ確かか、そして何が分かっていないかを一緒に記録します。",
-    lead2: "入口は三つあります。まず自分で語ってみるか、作りこんだ例である博物館のジオラマをご覧ください。",
-    s1: "語る", h1: "記録する", d1: "何についてかを言って、そのまま話してください（日本語・英語）。話したことを書き起こし、整理し、足りないことをたずねます。保存の前にすべて確認できます。", g1: "つどいを開く →",
-    s2: "見る", h2: "あつめたもの", d2: "これまでに集まったものを一覧で。博物館のジオラマもその一つです。ものの見え方や、日本語と英語を切り替えられます。", g2: "一覧を開く →",
-    s3: "作りこんだ例", h3: "オムシャ 1808", d3: "同じしくみの記録を、北海道博物館のジオラマ（1808年、樺太・久春古丹でのオムシャ）のために深く整えたものです。3Dで見てまわり、人物にふれて質問できます。記録にあることだけを答えます。", g3: "ジオラマを開く →",
+    brand: "記憶のつつみ", brandSub: "Memory Envelopes", lang: "English",
+    eyebrow: "人びとが知っていることを残す場所",
+    title: "記憶のつつみ", titleOther: "Memory Envelopes",
+    lead: "場所やものが抱えている記憶を集めていく場所です。家族の形見、駅のホーム、ひとつの集落、博物館の展示。",
+    more: "それぞれを「つつみ」に入れて残します。知っている人はだれでも、声でも文字でも、写真や3Dと一緒に書き足せます。語られたことば、だれが語ったか、そしてもうだれにも分からないことを、そのまま残します。",
+    artCap: "つつみの中に、小さなつつみを入れられます",
+    keepsEyebrow: "どのつつみにも", keepsTitle: "かならず残す四つのこと",
+    k1: "語られたこと", k1d: "語った人のことばのまま。日本語でも英語でも。",
+    k2: "だれが語ったか", k2d: "家族、近所の人、訪れた人、学芸員など、その人との関わりも。",
+    k3: "どれだけ確かか", k3d: "覚えていること、当時の記録、推測を区別します。",
+    k4: "分かっていないこと", k4d: "聞かれなかったこと、失われたこと、伝わらなかったことを、理由とともに。",
+    kindsLbl: "つつみになるもの", c1: "形見・もの", c2: "部屋", c3: "建物", c4: "場所・集落", c5: "博物館の展示",
+    grow: "つつみは育っていきます。あとから語り足すことができ、訂正は前の記録のとなりに加わります。上書きはしません。",
+    waysEyebrow: "三つの入口",
+    s1: "語る · つどい Gather", h1: "記憶を加える", d1: "何についてかを言って、そのまま話してください。「つどい」が書き起こし、整理し、足りないことをたずねます。保存の前にすべて確認できます。", g1: "つどいを開く →",
+    s2: "見る", h2: "あつめたもの", d2: "これまでのつつみを一覧で。開くと、写真や3Dと、語られたことを並べて見られます。日本語と英語を切り替えられます。", g2: "一覧を開く →",
+    s3: "作りこんだ例", h3: "オムシャ 1808", d3: "ひとつのつつみを深く整えた例です。北海道博物館のジオラマ（1808年、樺太・久春古丹でのオムシャ）を3Dで見てまわり、人物にふれて質問できます。記録にあることだけを答えます。", g3: "ジオラマを開く →",
+    a1h: "なぜ", a1p: "北海道では、場所やものについての知識を、少数の高齢の方が抱えています。その方がいなくなると、知識も失われます。博物館の展示には逆の問題があり、ひとつの語りが事実のように見えてしまいます。",
+    a2h: "しくみ", a2p: "話すと、ElevenLabs が書き起こし、Gemini が語られたことを一つずつの記録に分け、足りないことをたずねます。質問に答える声は記録にあることだけを使い、記録にないときはそう伝えます。",
+    a3h: "だれが", a3p: "Hack Hokkaido Build Week（札幌、2026年11月）で制作。コードはMITライセンスで公開しています。博物館のジオラマはデモとして掲載しています。",
     f1: "声と3Dの人物は合成による解釈であり、歴史の記録そのものではありません。",
-    f2: "Hack Hokkaido Build Week（2026年11月）で制作。", repo: "ソースコード（MIT）",
+    f2: "これはデモです。ここに加えた内容はだれでも見られます。", repo: "ソースコード（MIT）",
   },
 };
 const stored = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
