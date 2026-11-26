@@ -35,7 +35,8 @@ Hack Hokkaido Build Week, November 2026.
 | Collection viewer: every gathered item and the diorama in one grid, switchable versions and languages | Working (`/gather/view/`); translations are machine-made and unreviewed |
 | Per-person access to family- and community-only entries | Not built: one shared password for the whole site |
 | Preference dataset and held-out eval | Generated, not yet reviewed ([training/](training/)) |
-| Fine-tuned behaviour model (Adaption Labs) | Spec and data ready ([training/SPEC.md](training/SPEC.md)) |
+| Baseline before fine-tuning | Measured on the 20 held-out questions: plain base model 13/20, the same model with Talk's rules 19/20; model-judged, unreviewed ([training/BASELINE.md](training/BASELINE.md)) |
+| Fine-tuned behaviour model (Adaption Labs) | Not trained. Spec, data and the baseline to beat are ready ([training/SPEC.md](training/SPEC.md)) |
 
 ## The Envelope
 
@@ -117,6 +118,12 @@ node tools/make-dataset.mjs     # needs GEMINI_API_KEY
 writes `training/data/dpo.jsonl` (prompt, chosen, rejected), `dpo-meta.jsonl` (figure, question,
 failure shown, citations) and `eval.jsonl` (held-out questions with the expected behaviour). The
 batch is **unreviewed**; see [training/CURATION_LOG.md](training/CURATION_LOG.md).
+
+```powershell
+node tools/eval-baseline.mjs    # needs GEMINI_API_KEY and the server running
+```
+runs the held-out questions through the untuned model, with and without Talk's rules, and writes
+[training/BASELINE.md](training/BASELINE.md): the score a tuned model has to beat.
 
 Open **About** in the app, or any figure, to see what is known and what is not.
 
