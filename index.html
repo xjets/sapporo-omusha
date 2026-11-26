@@ -31,50 +31,24 @@
   .top .sp { flex: 1; }
   button.lang { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 8px 16px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
 
-  /* hero: title and introduction beside the space for graphic work */
-  .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); overflow: hidden; }
-  .hero .text { padding: 34px 32px; display: grid; gap: 14px; align-content: center; }
-  .hero h1 { margin: 0; font-size: clamp(34px, 5.4vw, 54px); line-height: 1.05; }
-  .hero .ja { font: 700 clamp(22px, 3.2vw, 30px)/1.2 "Zen Maru Gothic", sans-serif; color: var(--evidence); letter-spacing: .04em; }
-  html[lang=ja] .hero h1 { font-size: clamp(34px, 5.4vw, 52px); letter-spacing: .03em; }
+  /* hero: the title film across the full width, the name written over it, the introduction beneath */
+  .hero { overflow: hidden; }
+  .film { position: relative; background: #e9a77c; }
+  .film video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+  /* the name sits on a strip of cream paper, cut a little unevenly, so it stays readable whatever passes beneath */
+  .film .over { position: absolute; left: 2.6%; top: 5%; padding: clamp(8px, 1.4vw, 14px) clamp(14px, 2.4vw, 26px) clamp(10px, 1.6vw, 16px); display: grid; gap: 2px; color: #1b1a19; background: #f6efe0; transform: rotate(-1.4deg); clip-path: polygon(0.6% 3%, 99.2% 0, 100% 96%, 1.4% 100%); }
+  .film .eyebrow { color: #1b1a19; opacity: .75; }
+  .hero h1 { margin: 0; font-size: clamp(30px, 6vw, 62px); line-height: 1.02; -webkit-text-stroke: .7px currentColor; }
+  .hero .ja { font: 700 clamp(18px, 3vw, 30px)/1.25 "Zen Maru Gothic", sans-serif; letter-spacing: .05em; color: #1b1a19; }
+  html[lang=ja] .hero h1 { letter-spacing: .03em; -webkit-text-stroke: 0; }
   html[lang=ja] .hero .ja { font-family: "Nunito", sans-serif; letter-spacing: 0; }
-  .titlefilm { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 16px; display: block; background: #e9a77c; }
+  .hero .text { padding: 22px 28px 26px; display: grid; gap: 10px; }
   .hero .lead { font-size: 18px; }
   .hero .more { color: var(--soft); font-size: 15.5px; }
-  .art { position: relative; min-height: 300px; background: linear-gradient(160deg, var(--evidence-b), var(--form-b) 55%, var(--voice-b)); display: grid; place-items: center; }
-  .art svg { width: min(88%, 380px); height: auto; }
-  /* the looping envelopes: plain line drawings, one cycle every nine seconds */
-  .loop .ln { fill: #fff; stroke: var(--evidence); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-  .loop .dot { fill: var(--actors); }
-  .loop .envA { transform: translate(190px, 62px) scale(.5); animation: envA 9s infinite; }
-  .loop .envB { transform: translate(190px, 204px); animation: envB 9s infinite; }
-  .loop .flapBack { transform: translateY(-72px) scaleY(-1) translateY(72px); animation: flapBack 9s infinite; }
-  .loop .flapFront { transform: translateY(-72px) scaleY(0) translateY(72px); animation: flapFront 9s infinite; }
-  .loop .sealB { opacity: 0; animation: sealB 9s infinite; }
-  @keyframes envA {
-    0%, 34% { transform: translate(190px, 62px) scale(.5); opacity: 1; animation-timing-function: cubic-bezier(.5, 0, .3, 1); }
-    52%, 70% { transform: translate(190px, 214px) scale(.5); opacity: 1; }
-    70.1%, 100% { transform: translate(190px, 214px) scale(.5); opacity: 0; }
-  }
-  @keyframes envB {
-    0%, 8% { transform: translate(190px, 420px) scale(1); animation-timing-function: cubic-bezier(.2, .7, .3, 1); }
-    28%, 74% { transform: translate(190px, 204px) scale(1); animation-timing-function: cubic-bezier(.5, 0, .3, 1); }
-    94%, 100% { transform: translate(190px, 62px) scale(.5); }
-  }
-  @keyframes flapBack {
-    0%, 54% { transform: translateY(-72px) scaleY(-1) translateY(72px); animation-timing-function: ease-in; }
-    61%, 100% { transform: translateY(-72px) scaleY(0) translateY(72px); }
-  }
-  @keyframes flapFront {
-    0%, 61% { transform: translateY(-72px) scaleY(0) translateY(72px); animation-timing-function: ease-out; }
-    68%, 100% { transform: translateY(-72px) scaleY(1) translateY(72px); }
-  }
-  @keyframes sealB { 0%, 68% { opacity: 0; } 72%, 100% { opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { .loop * { animation: none !important; } }
-  .art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .art figcaption { position: absolute; left: 14px; bottom: 12px; font-size: 12.5px; color: var(--protocol); background: rgba(255, 255, 255, .78); padding: 3px 10px; border-radius: 999px; }
+  /* on a narrow screen the film is too small to write on, so the name sits above it */
+  @media (max-width: 620px) { .film { display: flex; flex-direction: column-reverse; } .film .over { position: static; background: #f6efe0; padding: 16px 18px 12px; transform: none; clip-path: none; } }
 
-  /* what an envelope keeps */
+
   .keeps { padding: 24px 26px; display: grid; gap: 16px; }
   .keeps .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
   .keep { background: var(--b); border-radius: 16px; padding: 14px 16px; display: grid; gap: 4px; }
@@ -106,7 +80,6 @@
   .about h3 { font-size: 16px; } .about p { font-size: 14.5px; color: var(--soft); }
   footer { color: var(--soft); font-size: 13.5px; display: grid; gap: 6px; }
   footer a { color: var(--accent); }
-  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; } .art { min-height: 220px; order: -1; } .hero .text { padding: 24px 22px; } }
 </style>
 </head>
 <body>
@@ -119,39 +92,18 @@
   </div>
 
   <section class="card hero">
+    <div class="film">
+      <video src="gather/media/title-sequence.mp4" poster="gather/media/title-sequence.jpg" autoplay loop muted playsinline preload="auto" aria-hidden="true"></video>
+      <div class="over">
+        <span class="eyebrow" data-t="eyebrow"></span>
+        <h1 class="pen" data-t="title"></h1>
+        <div class="ja" data-t="titleOther"></div>
+      </div>
+    </div>
     <div class="text">
-      <span class="eyebrow" data-t="eyebrow"></span>
-      <h1 class="pen" data-t="title"></h1>
-      <div class="ja" data-t="titleOther"></div>
-      <video class="titlefilm" src="gather/media/title-sequence.mp4" poster="gather/media/title-sequence.jpg" autoplay loop muted playsinline preload="auto" aria-hidden="true"></video>
       <p class="lead" data-t="lead"></p>
       <p class="more" data-t="more"></p>
     </div>
-    <!-- Space for graphic work. To use a picture instead of the drawing, put <img src="…" alt=""> inside this figure. -->
-    <figure class="art" style="margin:0">
-      <!-- A sealed envelope waits at the top; an open one rises, takes it in, seals, and rises to wait in its place. Then again. -->
-      <svg class="loop" viewBox="0 0 380 300" fill="none" aria-hidden="true">
-        <defs>
-          <path id="envBody" d="M-98,-73 H98 Q110,-73 110,-61 V61 Q110,73 98,73 H-98 Q-110,73 -110,61 V-61 Q-110,-73 -98,-73 Z"/>
-          <path id="envPocket" d="M-110,-64 L0,12 L110,-64 V61 Q110,73 98,73 H-98 Q-110,73 -110,61 Z"/>
-          <path id="envFlap" d="M-106,-72 L0,12 L106,-72 Z"/>
-        </defs>
-        <g class="envB">
-          <use href="#envBody" class="ln"/>
-          <g class="flapBack"><use href="#envFlap" class="ln"/></g>
-        </g>
-        <g class="envA">
-          <use href="#envBody" class="ln"/><use href="#envPocket" class="ln"/><use href="#envFlap" class="ln"/>
-          <circle cx="0" cy="12" r="10" class="dot"/>
-        </g>
-        <g class="envB">
-          <use href="#envPocket" class="ln"/>
-          <g class="flapFront"><use href="#envFlap" class="ln"/></g>
-          <circle cx="0" cy="12" r="10" class="dot sealB"/>
-        </g>
-      </svg>
-      <figcaption data-t="artCap"></figcaption>
-    </figure>
   </section>
 
   <section class="card keeps">
@@ -198,7 +150,6 @@ const S = {
     title: "Memory Envelopes", titleOther: "記憶のつつみ",
     lead: "A growing collection of memories held by places and things: a family keepsake, a station platform, a village, a museum display.",
     more: "Each one is kept in an envelope. Anyone who knows something can add to it, by voice or by typing, with photographs and 3D captures. The envelope keeps the words as they were told, who told them, and what nobody knows any more.",
-    artCap: "An envelope can hold smaller envelopes",
     keepsEyebrow: "Inside every envelope", keepsTitle: "Four things are always kept",
     k1: "What was told", k1d: "In the teller's own words, in English or Japanese.",
     k2: "Who told it", k2d: "And what they are to it: family, neighbour, visitor, curator.",
@@ -223,7 +174,6 @@ const S = {
     title: "記憶のつつみ", titleOther: "Memory Envelopes",
     lead: "場所やものが抱えている記憶を集めていく場所です。家族の形見、駅のホーム、ひとつの集落、博物館の展示。",
     more: "それぞれを「つつみ」に入れて残します。知っている人はだれでも、声でも文字でも、写真や3Dと一緒に書き足せます。語られたことば、だれが語ったか、そしてもうだれにも分からないことを、そのまま残します。",
-    artCap: "つつみの中に、小さなつつみを入れられます",
     keepsEyebrow: "どのつつみにも", keepsTitle: "かならず残す四つのこと",
     k1: "語られたこと", k1d: "語った人のことばのまま。日本語でも英語でも。",
     k2: "だれが語ったか", k2d: "家族、近所の人、訪れた人、学芸員など、その人との関わりも。",
