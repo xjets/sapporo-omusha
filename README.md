@@ -10,9 +10,9 @@ build on Gather. Its record was curated by hand in the Gather structure, and it 
 collection (`/gather/view/`) as one item among the others.
 
 **Live demo:** https://omusha-production.up.railway.app (Gather at `/gather/`, the collection at
-`/gather/view/`, the diorama at `/src/`). It is behind a password because it serves museum material we
-may not redistribute; judges have the password in the submission. This repository runs without that
-material and without keys ([Run it](#run-it)).
+`/gather/view/`, the diorama at `/src/`). It is open, with no password, for the judging period, and
+will be closed again afterwards. It shows museum material that is not in this repository and that we
+may not redistribute; this repository runs without that material and without keys ([Run it](#run-it)).
 
 ## Omusha 1808: talk to the diorama
 
@@ -38,7 +38,7 @@ Hack Hokkaido Build Week, November 2026.
 | Talk: ask a figure, answers only from the observation record | Working (Gemini; voice input and read-aloud in the browser) |
 | Gather: record what people know, by voice or text, in English or Japanese ([below](#gather-the-input-side)) | Working (ElevenLabs Scribe and voice, Gemini sorting); run end to end by voice on an Android phone |
 | Collection viewer: every gathered item and the diorama in one grid, switchable versions and languages | Working (`/gather/view/`); translations are machine-made and unreviewed |
-| Per-person access to family- and community-only entries | Not built: one shared password for the whole site |
+| Per-person access to family- and community-only entries | Not built. During judging the demo has no password, so every entry there is open to anyone |
 | Preference dataset and held-out eval | Generated, not yet reviewed ([training/](training/)) |
 | Baseline before fine-tuning | Measured on the 20 held-out questions: plain base model 13/20, the same model with Talk's rules 19/20; model-judged, unreviewed ([training/BASELINE.md](training/BASELINE.md)) |
 | Fine-tuned behaviour model (Adaption Labs) | Not trained. Spec, data and the baseline to beat are ready ([training/SPEC.md](training/SPEC.md)) |
@@ -170,11 +170,11 @@ then **Copy JSON** and paste it into `src/hotspots.json`.
 
 ## Deploy (team demo)
 
-The site runs as a small Node server (`server.mjs`, `npm start`) behind one shared
-password (`APP_PASSWORD`, any user name). Museum assets are not in this repository:
+The site runs as a small Node server (`server.mjs`, `npm start`). Setting `APP_PASSWORD` puts
+one shared password on everything (any user name); the demo has it switched off for judging. Museum assets are not in this repository:
 they live in a private S3-compatible bucket (`BUCKET`, `ENDPOINT`, `REGION`,
-`ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`) and the server streams them to signed-in users
-only. Search engines and AI crawlers are told to stay out.
+`ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`) and the server streams them to visitors
+(to signed-in users only, when a password is set). Search engines and AI crawlers are told to stay out.
 
 ```powershell
 npm run upload-assets              # needs OMUSHA_URL, APP_PASSWORD, UPLOAD_TOKEN (.env.deploy)
