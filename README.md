@@ -1,6 +1,6 @@
-# Gather, with Omusha 1808
+# Gather つどい, with Omusha 1808
 
-**Gather** is the parent: a framework for recording what people know about a place or a thing,
+**Gather** (つどい, *tsudoi*: a gathering of people) is the parent: a framework for recording what people know about a place or a thing,
 by voice or text, keeping who said it, how well it is supported and what is missing
 ([Gather](#gather-the-input-side), [the structure behind it](#the-envelope)).
 
