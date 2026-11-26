@@ -140,7 +140,8 @@ Needs Node 22 or later. Nothing to install for a local run.
 .\serve.ps1          # or: npm start
 ```
 
-Open `http://localhost:8081/src/` for the diorama, `/gather/` to record something and
+Open `http://localhost:8081/` for the entry page, which leads to all three parts:
+`/src/` for the diorama, `/gather/` to record something and
 `/gather/view/` for the collection. Without any keys the pages, the observation record and the
 viewer all work; the AI parts answer "not set up" until the keys are there (copy
 [.env.example](.env.example) for the names):

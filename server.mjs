@@ -508,7 +508,10 @@ const server = http.createServer(async (req, res) => {
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); return res.end(); }
 
-  if (pathname === '/' || pathname === '') { res.writeHead(302, { location: '/src/' + url.search }); return res.end(); }
+  if (pathname === '/' || pathname === '') { // the entry page; old links that open a figure or a capture still go to the diorama
+    if (url.searchParams.has('figure') || url.searchParams.has('src') || url.searchParams.has('edit')) { res.writeHead(302, { location: '/src/' + url.search }); return res.end(); }
+    return sendFile(res, path.join(ROOT, 'index.html'), 'no-cache');
+  }
   if (pathname === '/robots.txt') { res.writeHead(200, { 'content-type': 'text/plain' }); return res.end('User-agent: *\nDisallow: /\n'); }
   if (pathname.startsWith('/assets/')) return sendAsset(res, pathname.slice('/assets/'.length));
 

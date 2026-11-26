@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Gather · つどい</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --bg: #eef1f5; --card: #ffffff; --ink: #26303b; --soft: #66717e; --line: #dde2e8; --accent: #3f5873;
+    --form: #45618a; --form-b: #dbe5f1; --evidence: #5f5189; --evidence-b: #e3ddf1; --voice: #3b6f6b; --voice-b: #d3e8e5;
+    --absence: #5c6570; --absence-b: #e2e5e9;
+  }
+  @font-face { font-family: "Hershey Simplex Pen"; src: url("gather/fonts/hershey-simplex-pen.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+  * { box-sizing: border-box; }
+  body { margin: 0; color: var(--ink); background: var(--bg); font: 16px/1.6 "Nunito", "Zen Maru Gothic", "Hiragino Maru Gothic ProN", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 22px; }
+  .pen { font-family: "Hershey Simplex Pen", "Zen Maru Gothic", sans-serif; font-weight: 400; word-spacing: -.12em; -webkit-text-stroke: .35px currentColor; }
+  html[lang=ja] .pen { font-weight: 700; -webkit-text-stroke: 0; }
+  header { display: flex; align-items: center; gap: 12px; }
+  .mark { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--voice-b); color: var(--voice); font: 700 24px "Zen Maru Gothic", sans-serif; flex: none; }
+  header h1 { margin: 0; font-size: 30px; line-height: 1.1; }
+  header p { margin: 0; color: var(--soft); font-size: 14px; }
+  header .sp { flex: 1; }
+  button.lang { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 8px 16px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .lead { background: var(--card); border-radius: 20px; padding: 22px 24px; box-shadow: 0 1px 2px rgba(38, 48, 59, .06); }
+  .lead p { margin: 0; font-size: 17px; }
+  .lead p + p { margin-top: 10px; color: var(--soft); font-size: 15px; }
+  .paths { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); }
+  a.path { display: grid; grid-template-rows: auto auto 1fr auto; gap: 10px; background: var(--card); border-radius: 20px; padding: 22px; text-decoration: none; color: inherit; border: 2px solid transparent; box-shadow: 0 1px 2px rgba(38, 48, 59, .06); transition: border-color .15s, transform .15s; }
+  a.path:hover, a.path:focus-visible { border-color: var(--c); transform: translateY(-2px); outline: none; }
+  .path .top { display: flex; align-items: center; gap: 12px; }
+  .seal { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; background: var(--b); color: var(--c); font: 700 28px "Zen Maru Gothic", sans-serif; flex: none; }
+  .step { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--c); }
+  .path h2 { margin: 0; font-size: 25px; line-height: 1.15; }
+  .path p { margin: 0; color: var(--soft); font-size: 15px; }
+  .go { justify-self: start; background: var(--c); color: #fff; border-radius: 999px; padding: 10px 20px; font-weight: 800; font-size: 15px; }
+  .p1 { --c: var(--voice); --b: var(--voice-b); } .p2 { --c: var(--form); --b: var(--form-b); } .p3 { --c: var(--evidence); --b: var(--evidence-b); }
+  footer { color: var(--soft); font-size: 13.5px; display: grid; gap: 6px; }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="mark">集</span>
+    <div><h1 class="pen" data-t="title"></h1><p data-t="sub"></p></div>
+    <span class="sp"></span>
+    <button class="lang" id="lang" type="button"></button>
+  </header>
+
+  <section class="lead"><p data-t="lead1"></p><p data-t="lead2"></p></section>
+
+  <section class="paths">
+    <a class="path p1" id="a1" href="gather/">
+      <div class="top"><span class="seal">声</span><span class="step" data-t="s1"></span></div>
+      <h2 class="pen" data-t="h1"></h2><p data-t="d1"></p><span class="go" data-t="g1"></span>
+    </a>
+    <a class="path p2" id="a2" href="gather/view/">
+      <div class="top"><span class="seal">蔵</span><span class="step" data-t="s2"></span></div>
+      <h2 class="pen" data-t="h2"></h2><p data-t="d2"></p><span class="go" data-t="g2"></span>
+    </a>
+    <a class="path p3" id="a3" href="src/">
+      <div class="top"><span class="seal">館</span><span class="step" data-t="s3"></span></div>
+      <h2 class="pen" data-t="h3"></h2><p data-t="d3"></p><span class="go" data-t="g3"></span>
+    </a>
+  </section>
+
+  <footer><span data-t="f1"></span><span data-t="f2"></span><span><a href="https://github.com/xjets/sapporo-omusha" data-t="repo"></a></span></footer>
+</div>
+<script>
+const S = {
+  en: {
+    title: "Gather", sub: "つどい · with Omusha 1808", lang: "日本語",
+    lead1: "Gather keeps what people know about a place or a thing: their own words, who said it, how well it is supported, and what is missing.",
+    lead2: "There are three ways in. Start by telling something yourself, or go straight to the worked example: one museum diorama, recorded in depth.",
+    s1: "Tell", h1: "Record something", d1: "Say what it is about and start talking, in English or Japanese. It writes down what you say, sorts it, and asks for what is missing. You check everything before it is saved.", g1: "Open Gather →",
+    s2: "Look", h2: "The collection", d2: "Everything gathered so far in one grid, the museum diorama among it. Switch between versions of each object and between English and Japanese.", g2: "Open the collection →",
+    s3: "Deep example", h3: "Omusha 1808", d3: "The same kind of record, curated for the Hokkaido Museum's diorama of an 1808 ceremony at Kushun Kotan, Sakhalin. Walk around it in 3D, tap a figure, and ask a question. It answers only from its record.", g3: "Open the diorama →",
+    f1: "The voices and the 3D figures are synthetic interpretations, not historical records.",
+    f2: "Built at Hack Hokkaido Build Week, November 2026.", repo: "Source code (MIT)",
+  },
+  ja: {
+    title: "つどい", sub: "Gather · オムシャ1808とともに", lang: "English",
+    lead1: "「つどい」は、場所やものについて人びとが知っていることを残します。語ったことば、だれが語ったか、どれだけ確かか、そして何が分かっていないかを一緒に記録します。",
+    lead2: "入口は三つあります。まず自分で語ってみるか、作りこんだ例である博物館のジオラマをご覧ください。",
+    s1: "語る", h1: "記録する", d1: "何についてかを言って、そのまま話してください（日本語・英語）。話したことを書き起こし、整理し、足りないことをたずねます。保存の前にすべて確認できます。", g1: "つどいを開く →",
+    s2: "見る", h2: "あつめたもの", d2: "これまでに集まったものを一覧で。博物館のジオラマもその一つです。ものの見え方や、日本語と英語を切り替えられます。", g2: "一覧を開く →",
+    s3: "作りこんだ例", h3: "オムシャ 1808", d3: "同じしくみの記録を、北海道博物館のジオラマ（1808年、樺太・久春古丹でのオムシャ）のために深く整えたものです。3Dで見てまわり、人物にふれて質問できます。記録にあることだけを答えます。", g3: "ジオラマを開く →",
+    f1: "声と3Dの人物は合成による解釈であり、歴史の記録そのものではありません。",
+    f2: "Hack Hokkaido Build Week（2026年11月）で制作。", repo: "ソースコード（MIT）",
+  },
+};
+const stored = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+const store = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+let LANG = new URLSearchParams(location.search).get("lang") || stored("gather.lang") || ((navigator.language || "").startsWith("ja") ? "ja" : "en");
+if (LANG !== "ja") LANG = "en";
+function render() {
+  document.documentElement.lang = LANG;
+  for (const el of document.querySelectorAll("[data-t]")) el.textContent = S[LANG][el.dataset.t];
+  document.getElementById("lang").textContent = S[LANG].lang;
+  document.getElementById("a1").href = `gather/?lang=${LANG}`;
+  document.getElementById("a2").href = `gather/view/?lang=${LANG}`;
+  document.getElementById("a3").href = `src/?lang=${LANG}`;
+}
+document.getElementById("lang").addEventListener("click", () => { LANG = LANG === "ja" ? "en" : "ja"; store("gather.lang", LANG); store("omusha.lang", LANG); render(); });
+render();
+</script>
+</body>
+</html>
