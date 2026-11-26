@@ -16,7 +16,10 @@
   }
   @font-face { font-family: "Hershey Simplex Pen"; src: url("gather/fonts/hershey-simplex-pen.woff2") format("woff2"); font-weight: 400; font-display: swap; }
   * { box-sizing: border-box; }
-  body { margin: 0; color: var(--ink); background: var(--bg); font: 16px/1.6 "Nunito", "Zen Maru Gothic", "Hiragino Maru Gothic ProN", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { margin: 0; color: var(--ink); background: var(--bg); font: 17px/1.55 "Hershey Simplex Pen", "Zen Maru Gothic", "Hiragino Maru Gothic ProN", system-ui, sans-serif; word-spacing: -.1em; -webkit-text-stroke: .3px currentColor; -webkit-font-smoothing: antialiased; }
+  html[lang=ja] body { font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", system-ui, sans-serif; word-spacing: 0; -webkit-text-stroke: 0; }
+  b, .eyebrow, .step, .go, button.lang, .top .name, .about h3 { -webkit-text-stroke: .6px currentColor; }
+  html[lang=ja] b, html[lang=ja] .eyebrow, html[lang=ja] .step, html[lang=ja] .go, html[lang=ja] button.lang, html[lang=ja] .top .name, html[lang=ja] .about h3 { -webkit-text-stroke: 0; }
   .wrap { max-width: 1040px; margin: 0 auto; padding: 18px 16px 60px; display: grid; gap: 22px; grid-template-columns: minmax(0, 1fr); }
   .pen { font-family: "Hershey Simplex Pen", "Zen Maru Gothic", sans-serif; font-weight: 400; word-spacing: -.12em; -webkit-text-stroke: .35px currentColor; }
   html[lang=ja] .pen { font-weight: 700; -webkit-text-stroke: 0; }
