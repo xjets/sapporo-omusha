@@ -68,10 +68,17 @@ async function writeAsset(req, res, key) {
     res.writeHead(200, { 'content-type': 'application/json' });
     return res.end(JSON.stringify((out.Contents || []).map((o) => ({ key: o.Key, size: o.Size }))));
   }
-  if (req.method === 'DELETE' && key === '*') { // take everything down
-    const out = await s3.client.send(new s3.ListObjectsV2Command({ Bucket: s3.bucket }));
-    for (const o of out.Contents || []) await s3.client.send(new s3.DeleteObjectCommand({ Bucket: s3.bucket, Key: o.Key }));
-    res.writeHead(200, { 'content-type': 'text/plain' }); return res.end(`Deleted ${(out.Contents || []).length}`);
+  if (req.method === 'DELETE' && key === '*') { // take every museum asset down; gathered records and their files are left alone
+    let token, deleted = 0, kept = 0;
+    do {
+      const out = await s3.client.send(new s3.ListObjectsV2Command({ Bucket: s3.bucket, ContinuationToken: token }));
+      for (const o of out.Contents || []) {
+        if (!ASSET_KEY.test(o.Key)) { kept++; continue; }
+        await s3.client.send(new s3.DeleteObjectCommand({ Bucket: s3.bucket, Key: o.Key })); deleted++;
+      }
+      token = out.IsTruncated ? out.NextContinuationToken : undefined;
+    } while (token);
+    res.writeHead(200, { 'content-type': 'text/plain' }); return res.end(`Deleted ${deleted} museum assets; left ${kept} other objects`);
   }
   if (!ASSET_KEY.test(key)) { res.writeHead(400, { 'content-type': 'text/plain' }); return res.end('Unexpected asset path'); }
   if (req.method === 'DELETE') {
@@ -479,6 +486,8 @@ async function sendAsset(res, key) {
     const file = safeJoin(path.join(ROOT, 'assets'), key);
     return file ? sendFile(res, file, cache) : (res.writeHead(404), res.end());
   }
+  // The bucket also holds gathered records, so only keys shaped like a museum asset are ever served from here.
+  if (!ASSET_KEY.test(key)) { res.writeHead(404); return res.end(); }
   try {
     const out = await s3.client.send(new s3.GetObjectCommand({ Bucket: s3.bucket, Key: key }));
     res.writeHead(200, {
@@ -495,9 +504,17 @@ async function sendAsset(res, key) {
   }
 }
 
-const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, 'http://x');
-  const pathname = decodeURIComponent(url.pathname);
+// One bad request must never end the process: anything a handler throws becomes a 500 for that request only.
+const server = http.createServer((req, res) => {
+  handle(req, res).catch((err) => {
+    console.error('request failed', req.method, String(req.url).slice(0, 120), err?.message);
+    try { if (!res.headersSent) res.writeHead(500); res.end(); } catch { /* connection already gone */ }
+  });
+});
+async function handle(req, res) {
+  let url, pathname;
+  try { url = new URL(req.url, 'http://x'); pathname = decodeURIComponent(url.pathname); }
+  catch { res.writeHead(400, { 'content-type': 'text/plain' }); return res.end('Bad request'); }
   if (pathname === '/healthz') { res.writeHead(200, { 'content-type': 'application/json' }); return res.end('{"ok":true}'); }
 
   if (!authorised(req)) {
@@ -529,7 +546,7 @@ const server = http.createServer(async (req, res) => {
   if (!file) { res.writeHead(400); return res.end(); }
   if (pathname.endsWith('/')) file = path.join(file, 'index.html');
   sendFile(res, file, /\.(mp4|woff2)$/.test(file) ? 'public, max-age=3600' : 'no-cache', req);
-});
+}
 
 server.listen(PORT, () => {
   console.log(`Omusha running at http://localhost:${PORT}/`);
