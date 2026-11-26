@@ -83,6 +83,7 @@
 <div class="wrap">
   <header class="top">
     <div class="brand"><a class="mark" href="/" title="Home" style="text-decoration:none">蔵</a><div><h1 class="pen" id="title"></h1><p id="subtitle"></p></div></div>
+    <a class="btn" href="/" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg><span id="homeLabel">Home</span></a>
     <button id="publicBtn" aria-pressed="false" data-layer="protocol"></button>
     <a class="btn" href="../" id="addLink"></a>
     <button id="lang" aria-label="Language / 言語" style="padding:5px 9px">
@@ -169,7 +170,7 @@ async function loadDiorama() {
 function chrome() {
   document.documentElement.lang = LANG;
   for (const f of document.querySelectorAll(".flag")) f.classList.toggle("on", f.dataset.l === LANG);
-  $("title").textContent = t("title"); $("subtitle").textContent = t("subtitle"); $("addLink").textContent = t("add");
+  $("title").textContent = t("title"); $("subtitle").textContent = t("subtitle"); $("addLink").textContent = t("add"); $("homeLabel").textContent = LANG === "ja" ? "ホーム" : "Home";
   $("publicBtn").textContent = PUBLIC ? t("publicOn") : t("publicOff"); $("publicBtn").setAttribute("aria-pressed", String(PUBLIC));
 }
 

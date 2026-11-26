@@ -140,6 +140,7 @@
   <header class="top">
     <div class="brand"><a class="mark" href="/" title="Home" style="text-decoration:none">集</a><div><h1 data-t="title">Gather</h1><p data-t="subtitle"></p></div></div>
     <div class="seg" role="group"><button id="modeSelf" data-t="modeSelf">Tell it myself</button><button id="modeIv" data-t="modeIv">Interview someone</button></div>
+    <a class="btn" href="/" style="text-decoration:none;font-size:13px;min-height:40px;padding:5px 12px;display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg><span data-t="home">Home</span></a>
     <a class="btn" href="view/" data-t="seeAll" style="text-decoration:none;font-size:13px;min-height:40px;padding:5px 12px">Collection</a>
     <button id="lang" class="lang" aria-label="Language / 言語">
       <svg class="flag" data-l="en" viewBox="0 0 60 30"><clipPath id="s"><path d="M0,0v30h60V0z"/></clipPath><clipPath id="q"><path d="M30,15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#s)"><path d="M0,0v30h60V0z" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" clip-path="url(#q)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></g></svg>
@@ -269,7 +270,7 @@ function toast(text) { const t = $("toast"); t.textContent = text; t.classList.a
 const S = {
   en: {
     title: "Gather", subtitle: "Record what someone knows about a place or a thing.", subtitle_self: "Keep what you know about a place or a thing.",
-    seeAll: "Collection", modeSelf: "Tell it myself", modeIv: "Interview someone",
+    home: "Home", seeAll: "Collection", modeSelf: "Tell it myself", modeIv: "Interview someone",
     wTitle: "Tell us what you know", wBody: "A house, a tool, a festival, a photograph, a street: the things around us hold memories that are lost when nobody writes them down. This takes about ten minutes. You decide who may see it.",
     w1: "Choose a place or a thing.", w2: "Tell it in your own words. Speak or type.", w3: "Add a photograph if you have one.", w4: "Check everything before it is saved.",
     stepOf: (n, m, name) => `Step ${n} of ${m} · ${name}`, stepNames: ["", "What is it about?", "About you", "Tell", "Pictures", "Check"],
@@ -320,7 +321,7 @@ const S = {
   },
   ja: {
     title: "つどい", subtitle: "場所やものについて、その人が知っていることを記録します。", subtitle_self: "場所やものについて、あなたが知っていることを残します。",
-    seeAll: "あつめたもの", modeSelf: "自分で話す", modeIv: "聞き取りをする",
+    home: "ホーム", seeAll: "あつめたもの", modeSelf: "自分で話す", modeIv: "聞き取りをする",
     wTitle: "知っていることを聞かせてください", wBody: "家、道具、祭り、写真、通り。身のまわりのものには記憶が宿っていますが、書きとめなければ消えてしまいます。10分ほどで終わります。だれが見てよいかは、あなたが決めます。",
     w1: "場所か、ものを一つ選びます。", w2: "自分の言葉で話します。声でも、入力でも。", w3: "写真があれば加えます。", w4: "保存する前に、すべて確かめられます。",
     stepOf: (n, m, name) => `${m}のうち${n} · ${name}`, stepNames: ["", "何についてですか", "あなたについて", "話す", "写真", "確かめる"],
