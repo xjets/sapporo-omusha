@@ -35,8 +35,7 @@
   .hero { overflow: hidden; }
   .film { position: relative; background: #e9a77c; }
   .film video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
-  /* the name sits on a strip of cream paper, cut a little unevenly, so it stays readable whatever passes beneath */
-  .film .over { position: absolute; left: 2.6%; top: 5%; padding: clamp(8px, 1.4vw, 14px) clamp(14px, 2.4vw, 26px) clamp(10px, 1.6vw, 16px); display: grid; gap: 2px; color: #1b1a19; background: #f6efe0; transform: rotate(-1.4deg); clip-path: polygon(0.6% 3%, 99.2% 0, 100% 96%, 1.4% 100%); }
+  .film .over { position: absolute; left: 0; top: 0; padding: clamp(14px, 3vw, 30px) clamp(16px, 3.4vw, 34px); display: grid; gap: 2px; color: #1b1a19; }
   .film .eyebrow { color: #1b1a19; opacity: .75; }
   .hero h1 { margin: 0; font-size: clamp(30px, 6vw, 62px); line-height: 1.02; -webkit-text-stroke: .7px currentColor; }
   .hero .ja { font: 700 clamp(18px, 3vw, 30px)/1.25 "Zen Maru Gothic", sans-serif; letter-spacing: .05em; color: #1b1a19; }
@@ -46,7 +45,7 @@
   .hero .lead { font-size: 18px; }
   .hero .more { color: var(--soft); font-size: 15.5px; }
   /* on a narrow screen the film is too small to write on, so the name sits above it */
-  @media (max-width: 620px) { .film { display: flex; flex-direction: column-reverse; } .film .over { position: static; background: #f6efe0; padding: 16px 18px 12px; transform: none; clip-path: none; } }
+  @media (max-width: 620px) { .film { display: flex; flex-direction: column-reverse; } .film .over { position: static; background: #e9a77c; padding: 16px 18px 12px; } }
 
 
   .keeps { padding: 24px 26px; display: grid; gap: 16px; }
