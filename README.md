@@ -1,4 +1,15 @@
-# Omusha 1808: talk to the diorama
+# Gather, with Omusha 1808
+
+**Gather** is the parent: a framework for recording what people know about a place or a thing,
+by voice or text, keeping who said it, how well it is supported and what is missing
+([Gather](#gather-the-input-side), [the structure behind it](#the-envelope)).
+
+**Omusha 1808** is one application underneath it, specific to Hokkaido: the same record, curated
+in depth for a single museum diorama and given a 3D scene and voices. It shows what a museum could
+build on Gather. Its record was curated by hand in the Gather structure, and it appears in the Gather
+collection (`/gather/view/`) as one item among the others.
+
+## Omusha 1808: talk to the diorama
 
 A phone web app that opens a Gaussian splat of the 1808 Omusha diorama in the
 Hokkaido Museum (北海道博物館) and lets you tap figures to meet them. The scene is an
@@ -28,7 +39,7 @@ Hack Hokkaido Build Week, November 2026.
 
 ## The Envelope
 
-The app is the first working example of **The Envelope**: a structure for gathering,
+Gather and Omusha 1808 are both built on **The Envelope**: a structure for gathering,
 correcting and voicing the memory held by a place or a thing, from a keepsake to a
 museum diorama.
 
@@ -56,7 +67,7 @@ museum diorama.
 ### Gather: the input side
 
 `/gather/` is a separate application for recording what people know about a place or a thing. It is
-the Envelope's input, kept apart from the Omusha demo record and styled differently, because it is
+the general framework, kept apart from the Omusha demo record and styled differently, because it is
 meant to serve any project, not one museum.
 
 It has two ways in:
