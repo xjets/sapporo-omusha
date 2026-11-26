@@ -20,6 +20,9 @@ Hack Hokkaido Build Week, November 2026.
 | Close-up 3D model per figure | Working (7 elder figures) |
 | Character sheets (12 figures) | Drafts, not yet sourced |
 | Talk: ask a figure, answers only from the observation record | Working (Gemini; voice input and read-aloud in the browser) |
+| Gather: record what people know, by voice or text, in English or Japanese ([below](#gather-the-input-side)) | Working (ElevenLabs Scribe and voice, Gemini sorting); tested with typed and simulated speech more than with live microphones |
+| Collection viewer: every gathered item and the diorama in one grid, switchable versions and languages | Working (`/gather/view/`); translations are machine-made and unreviewed |
+| Per-person access to family- and community-only entries | Not built: one shared password for the whole site |
 | Preference dataset and held-out eval | Generated, not yet reviewed ([training/](training/)) |
 | Fine-tuned behaviour model (Adaption Labs) | Spec and data ready ([training/SPEC.md](training/SPEC.md)) |
 
@@ -108,11 +111,24 @@ Open **About** in the app, or any figure, to see what is known and what is not.
 
 ## Run it
 
+Needs Node 22 or later. Nothing to install for a local run.
+
 ```powershell
-.\serve.ps1
+.\serve.ps1          # or: npm start
 ```
 
-Open `http://localhost:8081/src/`. The museum capture is not in this repository
+Open `http://localhost:8081/src/` for the diorama, `/gather/` to record something and
+`/gather/view/` for the collection. Without any keys the pages, the observation record and the
+viewer all work; the AI parts answer "not set up" until the keys are there (copy
+[.env.example](.env.example) for the names):
+
+| Variable | Turns on |
+|---|---|
+| `GEMINI_API_KEY` | Talk, sorting what was said into observations, the next question, tidying transcripts, translation |
+| `ELEVENLABS_API_KEY` | Speech to text (Scribe) and the voice that asks questions and reads answers |
+| `APP_PASSWORD` | A shared password on the whole site (leave unset on your own machine) |
+
+The museum capture is not in this repository
 (see [NOTICE.md](NOTICE.md)); load your own with **Open**, or with
 `?src=../sample/sample.sog` once you've made one ([sample/README.md](sample/README.md)).
 
@@ -142,10 +158,32 @@ npm run upload-assets -- --list    # what is in the bucket
 npm run upload-assets -- --delete-all   # take every museum asset down
 ```
 
+## Use the Envelope for something else
+
+Nothing in Gather or the collection viewer is specific to this museum. To start a record of your
+own place or thing:
+
+1. Run the server and open `/gather/`. Each item you name becomes an envelope; what is told
+   about it is stored as append-only observations in `data/gather/` (or the bucket, when one is set).
+2. The formats are plain JSON, described by three schemas:
+   [envelope](envelopes/schema/envelope.schema.json), [form](envelopes/schema/form.schema.json),
+   [observation](envelopes/schema/observation.schema.json).
+3. Read it back with `GET /api/gather/gallery?lang=en|ja` and `GET /api/gather/item?id=…&lang=…`;
+   add to it with `POST /api/gather/envelopes` and `POST /api/gather/observations` (consent is required).
+4. The rules given to the model are ordinary text at the top of [gather.mjs](gather.mjs) and
+   [talk-prompt.mjs](talk-prompt.mjs): what it may infer, what it must leave as a gap.
+
+The diorama record in [envelopes/](envelopes/) is a worked example of a curated envelope: 34 observations
+across four time layers, with absences and their causes.
+
 ## Layout
 
 ```
-src/                 viewer, hotspots
+server.mjs           the server: pages, Talk, speech, assets
+gather.mjs           Gather's rules, storage and API
+gather/              the Gather page and the collection viewer (gather/view/)
+envelopes/           the diorama's envelope, forms, observations and the three schemas
+src/                 diorama viewer, hotspots
 characters/schema/   character-sheet format (JSON Schema)
 characters/1808/     one sheet per figure
 sample/              your own capture, so the repo runs without museum assets
