@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eef1f5">
+<title>Gather · Collection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+  "@sparkjsdev/spark": "https://sparkjs.dev/releases/spark/2.4.0/spark.module.js"
+} }
+</script>
+<script>self.ModelViewerElement = { meshoptDecoderLocation: 'https://cdn.jsdelivr.net/npm/meshoptimizer@0.25.0/meshopt_decoder.js' };</script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.0.0/dist/model-viewer.min.js"></script>
+<style>
+  :root {
+    --bg: #eef1f5; --card: #ffffff; --tint: #f6f8fa; --ink: #26303b; --soft: #66717e; --line: #dde2e8; --accent: #3f5873;
+    --form: #45618a; --form-b: #dbe5f1; --time: #7a6a2c; --time-b: #ebe6c6; --actors: #94544e; --actors-b: #f1dbd8;
+    --types: #47694b; --types-b: #d9e8da; --evidence: #5f5189; --evidence-b: #e3ddf1; --absence: #5c6570; --absence-b: #e2e5e9;
+    --protocol: #3d4b57; --protocol-b: #d6dee4; --voice: #3b6f6b; --voice-b: #d3e8e5;
+  }
+  @font-face { font-family: "Hershey Simplex Pen"; src: url("../fonts/hershey-simplex-pen.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+  * { box-sizing: border-box; }
+  body { margin: 0; color: var(--ink); background: var(--bg); font: 15px/1.6 "Nunito", "Zen Maru Gothic", "Hiragino Maru Gothic ProN", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 16px 16px 60px; display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
+  .pen { font-family: "Hershey Simplex Pen", "Zen Maru Gothic", sans-serif; font-weight: 400; word-spacing: -.12em; -webkit-text-stroke: .35px currentColor; }
+  html[lang=ja] .pen { font-weight: 700; -webkit-text-stroke: 0; }
+  header.top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  header.top .brand { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px; }
+  .mark { width: 40px; height: 40px; border-radius: 13px; background: var(--form-b); color: var(--form); display: grid; place-items: center; font: 700 20px "Zen Maru Gothic", sans-serif; flex: none; }
+  header.top h1 { margin: 0; font-size: 25px; line-height: 1.2; } header.top p { margin: 0; color: var(--soft); font-size: 13px; line-height: 1.35; }
+  button, a.btn { font: inherit; font-size: .93em; font-weight: 700; cursor: pointer; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 7px 13px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; text-decoration: none; }
+  button:hover, a.btn:hover { background: var(--tint); }
+  button[aria-pressed=true] { background: var(--lb, var(--form-b)); border-color: var(--lc, var(--form)); color: var(--lc, var(--form)); }
+  .flag { width: 28px; height: 19px; border-radius: 4px; display: none; box-shadow: 0 0 0 1px rgba(30,45,60,.2); } .flag.on { display: block; }
+  .hidden { display: none !important; } .muted { color: var(--soft); font-size: .87em; }
+  [data-layer=form] { --lc: var(--form); --lb: var(--form-b); } [data-layer=time] { --lc: var(--time); --lb: var(--time-b); }
+  [data-layer=actors] { --lc: var(--actors); --lb: var(--actors-b); } [data-layer=types] { --lc: var(--types); --lb: var(--types-b); }
+  [data-layer=evidence] { --lc: var(--evidence); --lb: var(--evidence-b); } [data-layer=absence] { --lc: var(--absence); --lb: var(--absence-b); }
+  [data-layer=protocol] { --lc: var(--protocol); --lb: var(--protocol-b); } [data-layer=voice] { --lc: var(--voice); --lb: var(--voice-b); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; } .chip { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; color: var(--lc, var(--soft)); background: var(--card); box-shadow: inset 0 0 0 1px var(--lb, var(--line)); white-space: nowrap; }
+  .chip.solid { background: var(--lb); box-shadow: none; }
+  .basis { font-size: 11.5px; font-weight: 800; padding: 1px 9px; border-radius: 999px; white-space: nowrap; } .basis.recorded { color: var(--types); background: var(--types-b); } .basis.symbolic { color: var(--evidence); background: var(--evidence-b); }
+
+  /* Grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; cursor: pointer; text-align: left; padding: 0; min-height: 0;
+    box-shadow: 0 1px 2px rgba(30,45,60,.04), 0 10px 28px rgba(30,45,60,.05); transition: transform .12s, box-shadow .12s; align-items: stretch; justify-content: stretch; font-weight: 400; }
+  .tile:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(30,45,60,.05), 0 16px 34px rgba(30,45,60,.09); background: var(--card); }
+  .tile .pic { aspect-ratio: 4 / 3; background: var(--lb); display: grid; place-items: center; color: var(--lc); font: 700 54px "Zen Maru Gothic", sans-serif; width: 100%; }
+  .tile .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tile .body { padding: 12px 14px 14px; display: grid; gap: 6px; align-content: start; width: 100%; }
+  .tile h3 { margin: 0; font-size: 19px; line-height: 1.3; } .tile .sub { color: var(--soft); font-size: 13px; }
+  .empty { background: var(--card); border: 1px dashed var(--line); border-radius: 20px; padding: 32px; text-align: center; color: var(--soft); }
+
+  /* Item */
+  .item { display: grid; gap: 16px; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; }
+  @media (max-width: 860px) { .item { grid-template-columns: minmax(0, 1fr); } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 18px; box-shadow: 0 1px 2px rgba(30,45,60,.04), 0 10px 28px rgba(30,45,60,.05); display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+  .card h2 { margin: 0; font-size: 26px; line-height: 1.25; } .card h3 { margin: 0; font-size: 12.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--lc, var(--soft)); }
+  .stage { border-radius: 16px; overflow: hidden; background: #1c232b; aspect-ratio: 4 / 3; position: relative; display: grid; place-items: center; color: #c9d2dc; }
+  .stage img, .stage model-viewer, .stage canvas { width: 100%; height: 100%; display: block; } .stage img { object-fit: contain; }
+  .stage .note { position: absolute; left: 12px; bottom: 12px; right: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; pointer-events: none; }
+  .stage .note span { background: rgba(255,255,255,.92); pointer-events: auto; } .stage .msg { padding: 20px; text-align: center; }
+  .versions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .versions button { border-radius: 14px; padding: 6px 12px; display: grid; gap: 1px; justify-items: start; text-align: left; font-size: 13px; }
+  .versions button small { font-weight: 600; color: var(--soft); font-size: 11px; }
+  .seg { display: inline-flex; background: #e2e7ed; border-radius: 12px; padding: 3px; }
+  .seg button { border: 0; background: transparent; min-height: 32px; padding: 3px 12px; font-size: 13px; color: var(--soft); border-radius: 10px; }
+  .seg button[aria-pressed=true] { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(30,45,60,.15); }
+  .obs { border-radius: 16px; background: var(--tint); border: 1px solid var(--line); border-left: 6px solid var(--time-b); padding: 12px 14px; display: grid; gap: 7px; grid-template-columns: minmax(0, 1fr); }
+  .obs.absence { border-left-color: var(--absence-b); border-style: dashed; border-left-style: solid; }
+  .obs .claim { font-size: 1.07em; } .obs .orig { color: var(--soft); font-size: .9em; border-left: 3px solid var(--line); padding-left: 10px; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="mark">蔵</span><div><h1 class="pen" id="title"></h1><p id="subtitle"></p></div></div>
+    <button id="publicBtn" aria-pressed="false" data-layer="protocol"></button>
+    <a class="btn" href="../" id="addLink"></a>
+    <button id="lang" aria-label="Language / 言語" style="padding:5px 9px">
+      <svg class="flag" data-l="en" viewBox="0 0 60 30"><clipPath id="s"><path d="M0,0v30h60V0z"/></clipPath><clipPath id="q"><path d="M30,15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#s)"><path d="M0,0v30h60V0z" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" clip-path="url(#q)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></g></svg>
+      <svg class="flag" data-l="ja" viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#BC002D"/></svg>
+    </button>
+  </header>
+  <main id="main"></main>
+</div>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+const api = async (path) => { const r = await fetch(`/api/gather/${path}`); const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || `Failed (${r.status})`); return d; };
+const stored = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+const store = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+
+const S = {
+  en: { title: "Collection", subtitle: "Places and things, and what people have told about them.", add: "Add something", publicOn: "Public view", publicOff: "Everything (team)",
+    empty: "Nothing has been gathered yet.", emptyPublic: "Nothing here is public yet.", back: "All items", loading: "Loading…", told: (n) => `${n} told`, noPicture: "",
+    versions: "Ways to see it", noForms: "No picture, scan or model yet.", descriptions: "What has been told", noObs: "Nothing has been told yet.", noObsPublic: "Nothing told here is public.",
+    shown: "Shown in", original: "As told", translated: (l) => (l === "ja" ? "Japanese" : "English"), machine: "machine translation", unknown: "Unknown", earlier: (n) => `corrected ${n}×`, download: "Download the file", cannotShow: "This file type cannot be shown here yet.",
+    splatLoading: "Loading the 3D capture…", splatFail: "The 3D capture could not be shown on this device.",
+    form: { photo: "Photograph", splat: "3D capture (splat)", scan: "Scanned model", reconstruction: "Placeholder model" }, basis: { recorded: "Recorded ●●●", symbolic: "Symbolic ●○○" },
+    basisNote: { recorded: "captured from the real thing", symbolic: "AI-made stand-in, not a record" },
+    v: { keepsake: "keepsake or object", made: "when it was made", lived: "when it was in use", observed: "since then", present: "now", "later-account": "remembered and told", "physical-trace": "can still be seen",
+      "contemporary-document": "document from the time", inference: "a guess", witness: "saw or lived it", descendant: "family, heard at home", contributor: "heard from others", "community-authority": "speaks for the community",
+      "never-collected": "nobody asked", lost: "no one left who knows", restricted: "not to be shared widely", team: "project team", family: "family only", community: "community", public: "public" } },
+  ja: { title: "あつめたもの", subtitle: "場所やもの、そして人びとが語ってくれたこと。", add: "新しく加える", publicOn: "一般公開の表示", publicOff: "すべて（チーム）",
+    empty: "まだ何も集まっていません。", emptyPublic: "一般公開のものはまだありません。", back: "一覧へ", loading: "読み込み中…", told: (n) => `お話 ${n}件`, noPicture: "",
+    versions: "見かた", noForms: "写真・スキャン・モデルはまだありません。", descriptions: "語られたこと", noObs: "まだ何も語られていません。", noObsPublic: "一般公開のお話はありません。",
+    shown: "表示", original: "語られたまま", translated: (l) => (l === "ja" ? "日本語" : "英語"), machine: "機械翻訳", unknown: "不明", earlier: (n) => `訂正 ${n}回`, download: "ファイルをダウンロード", cannotShow: "この形式はまだここで表示できません。",
+    splatLoading: "3Dキャプチャを読み込み中…", splatFail: "この端末では3Dキャプチャを表示できませんでした。",
+    form: { photo: "写真", splat: "3Dキャプチャ（スプラット）", scan: "スキャンしたモデル", reconstruction: "仮のモデル" }, basis: { recorded: "実写 ●●●", symbolic: "象徴 ●○○" },
+    basisNote: { recorded: "実物から記録したもの", symbolic: "AIで作った代役。記録ではありません" },
+    v: { keepsake: "形見・品物", room: "部屋", building: "建物", neighborhood: "地区", village: "集落", place: "場所", institution: "施設",
+      event: "出来事", use: "使い方", making: "作り方", meaning: "意味", inheritance: "受け継ぎ", contact: "出会い", appearance: "見た目", absence: "欠落",
+      made: "作られた時", lived: "使われていた時", observed: "その後", present: "いま",
+      "contemporary-document": "当時の資料", "later-account": "後の語り", "physical-trace": "残る跡", inference: "推測", none: "なし",
+      witness: "見た・経験した人", maker: "作った人", descendant: "子孫・家族", "community-authority": "地域の代表", scholar: "研究者", curator: "学芸員", contributor: "聞いた話", passerby: "通りがかり",
+      "never-collected": "聞かれなかった", destroyed: "壊された・捨てられた", suppressed: "やめさせられた", restricted: "広めない", lost: "知る人がいない",
+      family: "家族だけ", community: "地域", team: "チーム", public: "一般公開" } },
+};
+const params = new URLSearchParams(location.search);
+let LANG = params.get("lang") || stored("gather.lang");
+if (LANG !== "ja" && LANG !== "en") LANG = navigator.language?.startsWith("ja") ? "ja" : "en";
+let PUBLIC = params.has("public"), ORIGINAL = false, list = [], data = null, formIndex = 0, splat = null;
+const t = (k) => S[LANG][k];
+const label = (v) => S[LANG].v[v] || String(v || "").replace(/-/g, " ");
+const SEAL = { keepsake: "品", room: "間", building: "家", neighborhood: "町", village: "村", place: "場", institution: "館" };
+const LAYER = { keepsake: "actors", room: "time", building: "form", neighborhood: "types", village: "types", place: "voice", institution: "evidence" };
+const nameOf = (e) => (e.tr && !ORIGINAL ? e.tr.name : e.name), placeOf = (e) => (e.tr && !ORIGINAL ? e.tr.place : e.place);
+const chip = (box, text, layer, solid) => { const c = el("span", `chip${solid ? " solid" : ""}`, text); if (layer) c.dataset.layer = layer; box.append(c); };
+
+function chrome() {
+  document.documentElement.lang = LANG;
+  for (const f of document.querySelectorAll(".flag")) f.classList.toggle("on", f.dataset.l === LANG);
+  $("title").textContent = t("title"); $("subtitle").textContent = t("subtitle"); $("addLink").textContent = t("add");
+  $("publicBtn").textContent = PUBLIC ? t("publicOn") : t("publicOff"); $("publicBtn").setAttribute("aria-pressed", String(PUBLIC));
+}
+
+// ---------- Grid
+async function showGrid() {
+  stopSplat(); data = null;
+  const main = $("main"); main.innerHTML = ""; main.append(el("div", "muted", t("loading")));
+  list = await api(`gallery?lang=${LANG}`);
+  main.innerHTML = "";
+  const items = list.filter((e) => !PUBLIC || e.audience === "public" || e.publicObservations);
+  if (!items.length) { main.append(el("div", "empty", PUBLIC ? t("emptyPublic") : t("empty"))); return; }
+  const grid = el("div", "grid");
+  for (const e of items) {
+    const tile = el("button", "tile"); tile.dataset.layer = LAYER[e.scale] || "form";
+    const pic = el("div", "pic"), thumb = PUBLIC ? e.thumbPublic : e.thumb;
+    if (thumb) { const img = el("img"); img.src = `/api/gather/file/${thumb}`; img.alt = ""; img.loading = "lazy"; pic.append(img); } else pic.textContent = SEAL[e.scale] || "物";
+    const body = el("div", "body");
+    body.append(el("h3", "pen", nameOf(e)), el("div", "sub", [label(e.scale), placeOf(e)].filter(Boolean).join(" · ")));
+    const chips = el("div", "chips");
+    const n = PUBLIC ? e.publicObservations : e.observations; if (n) chip(chips, t("told")(n), "time", true);
+    for (const k of e.forms) chip(chips, t("form")[k], "form");
+    if (!PUBLIC) chip(chips, label(e.audience), "protocol", true);
+    body.append(chips); tile.append(pic, body);
+    tile.addEventListener("click", () => { location.hash = e.id; });
+    grid.append(tile);
+  }
+  main.append(grid);
+}
+
+// ---------- One item
+async function showItem(id) {
+  stopSplat();
+  const main = $("main"); main.innerHTML = ""; main.append(el("div", "muted", t("loading")));
+  try { data = await api(`item?id=${encodeURIComponent(id)}&lang=${LANG}`); } catch { location.hash = ""; return; }
+  formIndex = 0; renderItem();
+}
+function renderItem() {
+  stopSplat();
+  const main = $("main"); main.innerHTML = "";
+  const e = data.envelope;
+  const forms = data.forms.filter((f) => !PUBLIC || f.protocol?.audience === "public");
+  const obs = data.observations.filter((o) => !PUBLIC || o.protocol?.audience === "public");
+  const hasOther = !!e.tr || obs.some((o) => o.tr) || forms.some((f) => f.tr);
+
+  const bar = el("div", ""); bar.style.cssText = "display:flex;gap:10px;align-items:center;flex-wrap:wrap";
+  const back = el("button", "", `← ${t("back")}`); back.addEventListener("click", () => { location.hash = ""; }); bar.append(back);
+  if (hasOther) { // the descriptions: as told, or in the language chosen with the flag
+    const seg = el("div", "seg"), lab = el("span", "muted", t("shown"));
+    for (const [orig, text] of [[false, t("translated")(LANG)], [true, t("original")]]) {
+      const b = el("button", "", text); b.setAttribute("aria-pressed", String(ORIGINAL === orig)); b.addEventListener("click", () => { ORIGINAL = orig; renderItem(); }); seg.append(b);
+    }
+    bar.append(lab, seg);
+  }
+  main.append(bar);
+
+  const wrap = el("div", "item");
+  // Left: the object, in each of its versions
+  const left = el("section", "card"); left.dataset.layer = "form";
+  left.append(el("h2", "pen", nameOf(e)), el("div", "muted", [label(e.scale), placeOf(e)].filter(Boolean).join(" · ")));
+  const stage = el("div", "stage"); left.append(stage);
+  if (!forms.length) stage.append(el("div", "msg", t("noForms")));
+  else {
+    formIndex = Math.min(formIndex, forms.length - 1);
+    showForm(stage, forms[formIndex]);
+    left.append(el("h3", "", t("versions")));
+    const vs = el("div", "versions"); const count = {};
+    forms.forEach((f, i) => {
+      count[f.kind] = (count[f.kind] || 0) + 1;
+      const b = el("button", ""); b.dataset.layer = f.basis === "symbolic" ? "evidence" : "types"; b.setAttribute("aria-pressed", String(i === formIndex));
+      b.append(el("span", "", `${t("form")[f.kind]}${forms.filter((x) => x.kind === f.kind).length > 1 ? ` ${count[f.kind]}` : ""}`), el("small", "", t("basis")[f.basis]));
+      b.addEventListener("click", () => { formIndex = i; renderItem(); });
+      vs.append(b);
+    });
+    left.append(vs);
+  }
+  // Right: what has been told
+  const right = el("section", "card"); right.dataset.layer = "time";
+  right.append(el("h3", "", t("descriptions")));
+  if (!obs.length) right.append(el("div", "muted", PUBLIC ? t("noObsPublic") : t("noObs")));
+  for (const st of ["made", "lived", "observed", "present"]) {
+    const items = obs.filter((o) => o.stratum === st).sort((a, b) => (a.kind === "absence") - (b.kind === "absence"));
+    if (!items.length) continue;
+    const h = el("h3", "", label(st)); h.dataset.layer = "time"; right.append(h);
+    for (const o of items) {
+      const useTr = o.tr && !ORIGINAL, c = el("div", `obs${o.kind === "absence" ? " absence" : ""}`);
+      c.append(el("div", "claim", `${o.kind === "absence" ? `${t("unknown")}: ` : ""}${useTr ? o.tr.claim : o.claim}`));
+      const note = useTr ? o.tr.note : o.absence?.note; if (o.kind === "absence") c.append(el("div", "muted", [label(o.absence?.cause), note].filter(Boolean).join(" — ")));
+      if (o.quote) c.append(el("div", "orig", `“${o.quote}”`)); // the speaker's own words are never translated
+      const chips = el("div", "chips");
+      const when = useTr ? o.tr.when : o.when; if (when) chip(chips, when, "time", true);
+      chip(chips, label(o.kind), o.kind === "absence" ? "absence" : "types", true);
+      chip(chips, label(o.evidence), "evidence"); chip(chips, label(o.standing?.role), "evidence", true);
+      for (const a of (useTr ? o.tr.actors : o.actors) || []) if (a) chip(chips, a, "actors");
+      if (!PUBLIC) chip(chips, label(o.protocol?.audience), "protocol", true);
+      if (useTr) chip(chips, t("machine"), "absence");
+      if (o.earlier) chip(chips, t("earlier")(o.earlier));
+      c.append(chips); right.append(c);
+    }
+  }
+  wrap.append(left, right); main.append(wrap);
+}
+
+// ---------- The versions of the object
+function showForm(stage, f) {
+  const url = `/api/gather/file/${f.file}`, ext = f.file.split(".").pop().toLowerCase();
+  if (f.kind === "photo") { const img = el("img"); img.src = url; img.alt = f.caption || ""; stage.append(img); }
+  else if (ext === "glb") { const mv = document.createElement("model-viewer"); mv.setAttribute("src", url); mv.setAttribute("camera-controls", ""); mv.setAttribute("auto-rotate", ""); mv.setAttribute("shadow-intensity", "0.6"); mv.setAttribute("exposure", "1.05"); stage.append(mv); }
+  else if (f.kind === "splat") startSplat(stage, url);
+  else { const m = el("div", "msg"); const a = el("a", "btn", t("download")); a.href = url; a.download = f.name; m.append(el("div", "", t("cannotShow")), el("div", "", " "), a); stage.append(m); }
+  const note = el("div", "note");
+  note.append(el("span", `basis ${f.basis}`, `${t("basis")[f.basis]} · ${t("basisNote")[f.basis]}`));
+  const cap = f.tr && !ORIGINAL ? f.tr.caption : f.caption; const more = [cap, f.captured?.date].filter(Boolean).join(" · ");
+  if (more) note.append(el("span", "chip", more));
+  stage.append(note);
+}
+function stopSplat() { if (!splat) return; splat.stop = true; splat.renderer?.dispose(); splat = null; }
+async function startSplat(stage, url) {
+  const mine = splat = { stop: false };
+  const msg = el("div", "msg", t("splatLoading")); stage.append(msg);
+  try {
+    const [THREE, { OrbitControls }, { SparkRenderer, SplatMesh }] = await Promise.all([import("three"), import("three/addons/controls/OrbitControls.js"), import("@sparkjsdev/spark")]);
+    if (mine.stop) return;
+    const canvas = el("canvas"); stage.prepend(canvas);
+    const renderer = mine.renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setClearColor(0x1c232b);
+    const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(55, 4 / 3, 0.01, 2000);
+    scene.add(new SparkRenderer({ renderer, blurAmount: 0.1 }));
+    const controls = new OrbitControls(camera, canvas); controls.enableDamping = true;
+    const mesh = new SplatMesh({ url }); mesh.quaternion.set(1, 0, 0, 0); scene.add(mesh); // most captures are stored y-down
+    await mesh.initialized; if (mine.stop) return;
+    const box = mesh.getBoundingBox ? mesh.getBoundingBox() : new THREE.Box3().setFromObject(mesh);
+    const centre = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3()).length() || 2;
+    mesh.localToWorld(centre); controls.target.copy(centre); camera.position.copy(centre).add(new THREE.Vector3(0, size * 0.15, size * 0.6));
+    msg.remove();
+    const loop = () => { if (mine.stop) return; const w = stage.clientWidth, h = stage.clientHeight;
+      if (canvas.width !== Math.round(w * renderer.getPixelRatio())) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+      controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop); };
+    loop();
+  } catch (err) { console.error(err); msg.textContent = t("splatFail"); }
+}
+
+// ---------- Go
+function route() { chrome(); const id = location.hash.slice(1); (id ? showItem(id) : showGrid()).catch((err) => { $("main").textContent = err.message; }); }
+$("lang").addEventListener("click", () => { LANG = LANG === "ja" ? "en" : "ja"; store("gather.lang", LANG); ORIGINAL = false; route(); });
+$("publicBtn").addEventListener("click", () => { PUBLIC = !PUBLIC; chrome(); data ? renderItem() : showGrid(); });
+addEventListener("hashchange", route);
+route();
+</script>
+</body>
+</html>

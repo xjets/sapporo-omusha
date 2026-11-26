@@ -77,6 +77,12 @@ It has two ways in:
 5. **Form**: upload a Gaussian splat, photographs (resized in the browser, location data removed),
    a scanned mesh, or a placeholder AI mesh. Each is stamped recorded or symbolic.
 
+`/gather/view/` is the viewer for what has been gathered: a grid of items, and for each one the
+versions of the object (photographs, 3D capture, scanned model, placeholder model, each with its
+reality basis) beside what has been told. The flag switches English and Japanese; text in the other
+language is a cached machine translation, labelled as such, and the speaker's own words are never
+translated. "Public view" shows only what is marked public.
+
 A strip of eight seals shows which layers the envelope has so far. Audio is not kept. Rules and
 storage are in [gather.mjs](gather.mjs); the page is [gather/index.html](gather/index.html).
 Per-person access to family- and community-only entries is not built yet: everyone signed in to

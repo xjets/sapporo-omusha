@@ -25,7 +25,7 @@ const MAX_UPLOAD = 300 * 1024 * 1024;
 
 export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
   const LOCAL = path.join(ROOT, 'data', 'gather');
-  const KEYS = { envelopes: 'gather/envelopes.jsonl', observations: 'gather/observations.jsonl', forms: 'gather/forms.jsonl' };
+  const KEYS = { envelopes: 'gather/envelopes.jsonl', observations: 'gather/observations.jsonl', forms: 'gather/forms.jsonl', translations: 'gather/translations.jsonl' };
   const localPath = (key) => path.join(LOCAL, ...key.split('/').slice(1));
   const s = (v, max = 2000) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
   const newId = (p) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
@@ -187,6 +187,84 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
       audience: known(p.audience, GATHER_ENUMS.audience), story: p.story === true } };
   }
 
+  // ---- Viewer: the other language. What was said stays as recorded; a machine translation is kept beside it, cached, and labelled.
+  const langOf = (text) => (/[\u3040-\u30ff\u4e00-\u9fff]/.test(text || '') ? 'ja' : 'en');
+  const TRANSLATE_RULES = [
+    'Translate each string into the target language. Return every item with the same id and the same number of strings in the same order. An empty string stays empty.',
+    'These are short records of what older residents of a Hokkaido town said about a place or a thing. Translate plainly and faithfully: add nothing, explain nothing, keep uncertainty ("I think", "around") as it is.',
+    'Names of people and places: into English, romanise them; into Japanese, keep Japanese names in their usual writing and put foreign names in katakana. Era dates such as 昭和三十年ごろ become "around Showa 30 (1955)" in English. Going into Japanese, keep a Western year as a Western year (1955年ごろ); never add an era name that was not said.',
+  ].join('\n');
+  // items: [{ id, strings: [...] }] -> Map id -> translated strings (from the cache where possible)
+  async function translate(items, to) {
+    const out = new Map();
+    if (!items.length) return out;
+    const cached = await rows(KEYS.translations);
+    for (const c of cached) if (c.to === to) out.set(c.id, c.strings);
+    const need = items.filter((i) => !out.has(i.id) && i.strings.some(Boolean)).slice(0, 80);
+    const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    if (!need.length || !key) return out;
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${process.env.GATHER_MODEL || process.env.GEMINI_MODEL || 'gemini-3.5-flash'}:generateContent`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: TRANSLATE_RULES }] },
+          contents: [{ role: 'user', parts: [{ text: JSON.stringify({ targetLanguage: to === 'ja' ? 'Japanese' : 'English', items: need }) }] }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 8000, responseMimeType: 'application/json',
+            responseSchema: { type: 'ARRAY', items: { type: 'OBJECT', properties: { id: { type: 'STRING' }, strings: { type: 'ARRAY', items: { type: 'STRING' } } }, required: ['id', 'strings'] } },
+            thinkingConfig: { thinkingLevel: process.env.GATHER_THINKING || 'minimal' } },
+        }),
+        signal: AbortSignal.timeout(60000),
+      });
+      if (!res.ok) { console.error('gather translate', res.status, (await res.text()).slice(0, 300)); return out; }
+      const parsed = JSON.parse((await res.json()).candidates?.[0]?.content?.parts?.map((x) => x.text || '').join('') || '[]');
+      const fresh = [];
+      for (const p of parsed) {
+        const src = need.find((n) => n.id === p.id);
+        if (!src || !Array.isArray(p.strings) || p.strings.length !== src.strings.length) continue;
+        const strings = p.strings.map((x) => s(x, 2000));
+        out.set(p.id, strings); fresh.push({ id: p.id, to, strings, machine: true, createdAt: new Date().toISOString() });
+      }
+      if (fresh.length) await append(KEYS.translations, fresh);
+    } catch (err) { console.error('gather translate', err.message); }
+    return out;
+  }
+  const currentOf = (observations) => observations.filter((o) => !observations.some((x) => x.supersedes === o.id));
+  async function gallery(lang) {
+    const [envelopes, observations, forms] = await Promise.all([rows(KEYS.envelopes), rows(KEYS.observations), rows(KEYS.forms)]);
+    const tr = await translate(envelopes.filter((e) => langOf(e.name) !== lang).map((e) => ({ id: e.id, strings: [e.name, e.place || ''] })), lang);
+    return envelopes.map((e) => {
+      const obs = currentOf(observations.filter((o) => o.envelope === e.id)), fs = forms.filter((x) => x.envelope === e.id);
+      const other = langOf(e.name) !== lang && tr.get(e.id);
+      return { id: e.id, name: e.name, place: e.place || '', scale: e.scale, parent: e.parent || '', audience: e.audience, createdAt: e.createdAt, lang: langOf(e.name),
+        tr: other ? { name: other[0], place: other[1] } : null,
+        observations: obs.length, publicObservations: obs.filter((o) => o.protocol?.audience === 'public').length,
+        thumb: fs.find((x) => x.kind === 'photo')?.file || '', thumbPublic: fs.find((x) => x.kind === 'photo' && x.protocol?.audience === 'public')?.file || '',
+        forms: [...new Set(fs.map((x) => x.kind))] };
+    }).reverse();
+  }
+  async function item(id, lang) {
+    const envelope = (await rows(KEYS.envelopes)).find((e) => e.id === id);
+    if (!envelope) return null;
+    const all = (await rows(KEYS.observations)).filter((o) => o.envelope === id);
+    const observations = currentOf(all), forms = (await rows(KEYS.forms)).filter((x) => x.envelope === id);
+    const pack = (o) => [o.claim, o.when || '', o.absence?.note || '', ...(o.actors || [])];
+    const want = observations.filter((o) => (o.lang || langOf(o.claim)) !== lang).map((o) => ({ id: o.id, strings: pack(o) }));
+    if (langOf(envelope.name) !== lang) want.push({ id: envelope.id, strings: [envelope.name, envelope.place || ''] });
+    for (const x of forms) if (x.caption && langOf(x.caption) !== lang) want.push({ id: x.id, strings: [x.caption] });
+    const tr = await translate(want, lang);
+    const e = tr.get(envelope.id);
+    return {
+      envelope: { ...envelope, lang: langOf(envelope.name), tr: langOf(envelope.name) !== lang && e ? { name: e[0], place: e[1] } : null },
+      forms: forms.map((x) => ({ ...x, tr: x.caption && langOf(x.caption) !== lang && tr.get(x.id) ? { caption: tr.get(x.id)[0] } : null })),
+      observations: observations.map((o) => {
+        const x = (o.lang || langOf(o.claim)) !== lang && tr.get(o.id);
+        let earlier = 0; for (let p = o; p?.supersedes; p = all.find((y) => y.id === p.supersedes)) earlier++;
+        return { ...o, earlier, tr: x ? { claim: x[0], when: x[1], note: x[2], actors: x.slice(3) } : null };
+      }),
+    };
+  }
+
   function cleanObservation(o, session, existing) {
     const errors = [];
     const out = {
@@ -272,6 +350,11 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
       const observations = (await rows(KEYS.observations)).filter((o) => o.envelope === id);
       const forms = (await rows(KEYS.forms)).filter((f) => f.envelope === id);
       return sendJson(res, 200, { envelope, observations, forms, missing: missing(observations, forms).list });
+    }
+    if (route === 'gallery' && req.method === 'GET') return sendJson(res, 200, await gallery(q.get('lang') === 'ja' ? 'ja' : 'en'));
+    if (route === 'item' && req.method === 'GET') {
+      const data = await item(q.get('id'), q.get('lang') === 'ja' ? 'ja' : 'en');
+      return data ? sendJson(res, 200, data) : sendJson(res, 404, { error: 'Unknown envelope.' });
     }
     if (route === 'intake' && req.method === 'POST') {
       const { status, data } = await intake(await readJson(req, 20000));
