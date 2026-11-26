@@ -9,6 +9,11 @@ in depth for a single museum diorama and given a 3D scene and voices. It shows w
 build on Gather. Its record was curated by hand in the Gather structure, and it appears in the Gather
 collection (`/gather/view/`) as one item among the others.
 
+**Live demo:** https://omusha-production.up.railway.app (Gather at `/gather/`, the collection at
+`/gather/view/`, the diorama at `/src/`). It is behind a password because it serves museum material we
+may not redistribute; judges have the password in the submission. This repository runs without that
+material and without keys ([Run it](#run-it)).
+
 ## Omusha 1808: talk to the diorama
 
 A phone web app that opens a Gaussian splat of the 1808 Omusha diorama in the
@@ -28,8 +33,8 @@ Hack Hokkaido Build Week, November 2026.
 |---|---|
 | Splat viewer with tappable figures (Spark) | Working |
 | Hotspot placement tool (`?edit=1`) | Working |
-| Close-up 3D model per figure | Working (7 elder figures) |
-| Character sheets (12 figures) | Drafts, not yet sourced |
+| Close-up 3D model per figure | Working (8 figures; AI reconstructions, marked symbolic) |
+| Character sheets (13 figures) | Drafts, not yet sourced |
 | Talk: ask a figure, answers only from the observation record | Working (Gemini; voice input and read-aloud in the browser) |
 | Gather: record what people know, by voice or text, in English or Japanese ([below](#gather-the-input-side)) | Working (ElevenLabs Scribe and voice, Gemini sorting); run end to end by voice on an Android phone |
 | Collection viewer: every gathered item and the diorama in one grid, switchable versions and languages | Working (`/gather/view/`); translations are machine-made and unreviewed |
