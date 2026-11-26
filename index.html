@@ -81,7 +81,11 @@
   .k1 { --c: var(--voice); --b: var(--voice-b); } .k2 { --c: var(--actors); --b: var(--actors-b); } .k3 { --c: var(--evidence); --b: var(--evidence-b); } .k4 { --c: var(--absence); --b: var(--absence-b); }
   .kinds { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .chip { border: 1px solid var(--line); background: var(--tint); border-radius: 999px; padding: 4px 13px; font-size: 14px; font-weight: 700; }
-  .kinds .lbl { font-size: 14px; color: var(--soft); margin-right: 4px; }
+  .kinds { min-height: 46px; align-items: baseline; gap: 10px; }
+  .kinds .lbl { font-size: 18px; color: var(--soft); }
+  .rot { font-size: 30px; line-height: 1.2; color: var(--evidence); transition: opacity .6s ease, transform .6s ease; }
+  .rot.out { opacity: 0; transform: translateY(6px); }
+  @media (prefers-reduced-motion: reduce) { .rot { transition: none; } }
 
   /* the three ways in */
   .paths { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); }
@@ -156,7 +160,7 @@
       <div class="keep k3"><b data-t="k3"></b><span data-t="k3d"></span></div>
       <div class="keep k4"><b data-t="k4"></b><span data-t="k4d"></span></div>
     </div>
-    <div class="kinds"><span class="lbl" data-t="kindsLbl"></span><span class="chip" data-t="c1"></span><span class="chip" data-t="c2"></span><span class="chip" data-t="c3"></span><span class="chip" data-t="c4"></span><span class="chip" data-t="c5"></span></div>
+    <div class="kinds" aria-live="off"><span class="lbl" data-t="kindsLbl"></span><span class="rot pen" id="rot"></span></div>
     <p style="color:var(--soft);font-size:15px" data-t="grow"></p>
   </section>
 
@@ -198,7 +202,8 @@ const S = {
     k2: "Who told it", k2d: "And what they are to it: family, neighbour, visitor, curator.",
     k3: "How well it is supported", k3d: "Remembered, written down at the time, or a guess.",
     k4: "What is missing", k4d: "What was never asked, was lost, or was not passed on, and why.",
-    kindsLbl: "An envelope can be", c1: "a keepsake", c2: "a room", c3: "a building", c4: "a place or village", c5: "a museum display",
+    kindsLbl: "An envelope can be",
+    kinds: ["a keepsake", "a room", "a building", "a village", "a museum display", "a photograph", "a recipe", "a festival", "a workplace", "a journey", "a song", "a day that is remembered"],
     grow: "Envelopes keep growing. More can be told later, a correction is added beside the earlier version, and nothing is overwritten.",
     waysEyebrow: "Three ways in",
     s1: "Tell · Gather つどい", h1: "Add a memory", d1: "Say what it is about and start talking. Gather writes down what you say, sorts it, and asks for what is missing. You check everything before it is saved.", g1: "Open Gather →",
@@ -222,7 +227,8 @@ const S = {
     k2: "だれが語ったか", k2d: "家族、近所の人、訪れた人、学芸員など、その人との関わりも。",
     k3: "どれだけ確かか", k3d: "覚えていること、当時の記録、推測を区別します。",
     k4: "分かっていないこと", k4d: "聞かれなかったこと、失われたこと、伝わらなかったことを、理由とともに。",
-    kindsLbl: "つつみになるもの", c1: "形見・もの", c2: "部屋", c3: "建物", c4: "場所・集落", c5: "博物館の展示",
+    kindsLbl: "つつみになるもの",
+    kinds: ["形見", "部屋", "建物", "集落", "博物館の展示", "一枚の写真", "料理の作り方", "祭り", "仕事場", "旅", "歌", "忘れられない一日"],
     grow: "つつみは育っていきます。あとから語り足すことができ、訂正は前の記録のとなりに加わります。上書きはしません。",
     waysEyebrow: "三つの入口",
     s1: "語る · つどい Gather", h1: "記憶を加える", d1: "何についてかを言って、そのまま話してください。「つどい」が書き起こし、整理し、足りないことをたずねます。保存の前にすべて確認できます。", g1: "つどいを開く →",
@@ -239,9 +245,13 @@ const stored = (k) => { try { return localStorage.getItem(k); } catch { return n
 const store = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 let LANG = new URLSearchParams(location.search).get("lang") || stored("gather.lang") || ((navigator.language || "").startsWith("ja") ? "ja" : "en");
 if (LANG !== "ja") LANG = "en";
+// "An envelope can be …": one example at a time, fading to the next
+const rot = document.getElementById("rot"); let kind = 0;
+setInterval(() => { rot.classList.add("out"); setTimeout(() => { kind++; rot.textContent = S[LANG].kinds[kind % S[LANG].kinds.length]; rot.classList.remove("out"); }, 620); }, 2600);
 function render() {
   document.documentElement.lang = LANG;
   for (const el of document.querySelectorAll("[data-t]")) el.textContent = S[LANG][el.dataset.t];
+  rot.textContent = S[LANG].kinds[kind % S[LANG].kinds.length];
   document.getElementById("lang").textContent = S[LANG].lang;
   document.getElementById("a1").href = `gather/?lang=${LANG}`;
   document.getElementById("a2").href = `gather/view/?lang=${LANG}`;
