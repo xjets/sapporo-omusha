@@ -23,7 +23,7 @@ const BASIS = { splat: 'recorded', photo: 'recorded', scan: 'recorded', reconstr
 const FILE_EXT = { splat: /\.(sog|spz|ply|splat|ksplat)$/i, photo: /\.(jpe?g|png|webp)$/i, scan: /\.(glb|obj|stl|ply)$/i, reconstruction: /\.(glb|obj|stl)$/i };
 const MAX_UPLOAD = 300 * 1024 * 1024;
 
-export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
+export function createGather({ ROOT, s3, sendJson, readJson, mimeOf, isAdmin = () => false }) {
   const LOCAL = path.join(ROOT, 'data', 'gather');
   const KEYS = { envelopes: 'gather/envelopes.jsonl', observations: 'gather/observations.jsonl', forms: 'gather/forms.jsonl', translations: 'gather/translations.jsonl' };
   const localPath = (key) => path.join(LOCAL, ...key.split('/').slice(1));
@@ -40,6 +40,11 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
     await s3.client.send(new s3.PutObjectCommand({ Bucket: s3.bucket, Key: key, Body: text, ContentType: 'application/x-ndjson' }));
   }
   const rows = async (key) => (await readText(key)).split('\n').filter((l) => l.trim()).map((l) => JSON.parse(l));
+  // An admin removal is one more line (a tombstone), so the record stays append-only and a removal can be undone by hand.
+  const liveEnvelopes = async () => {
+    const all = await rows(KEYS.envelopes), gone = new Set(all.filter((e) => e.deleted).map((e) => e.id));
+    return all.filter((e) => !e.deleted && !gone.has(e.id));
+  };
   // Appends are serialised so two interviewers cannot overwrite each other's lines.
   let queue = Promise.resolve();
   function append(key, items) {
@@ -107,7 +112,7 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
   async function interview(body) {
     const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     if (!key) return { status: 503, data: { error: 'The interviewer assistant is not set up on this server (GEMINI_API_KEY is missing).' } };
-    const envelope = (await rows(KEYS.envelopes)).find((e) => e.id === body.envelope);
+    const envelope = (await liveEnvelopes()).find((e) => e.id === body.envelope);
     if (!envelope) return { status: 404, data: { error: 'Unknown envelope.' } };
     const lang = body.lang === 'ja' ? 'ja' : 'en';
     const observations = (await rows(KEYS.observations)).filter((o) => o.envelope === envelope.id);
@@ -231,7 +236,7 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
   }
   const currentOf = (observations) => observations.filter((o) => !observations.some((x) => x.supersedes === o.id));
   async function gallery(lang) {
-    const [envelopes, observations, forms] = await Promise.all([rows(KEYS.envelopes), rows(KEYS.observations), rows(KEYS.forms)]);
+    const [envelopes, observations, forms] = await Promise.all([liveEnvelopes(), rows(KEYS.observations), rows(KEYS.forms)]);
     const tr = await translate(envelopes.filter((e) => langOf(e.name) !== lang).map((e) => ({ id: e.id, strings: [e.name, e.place || ''] })), lang);
     return envelopes.map((e) => {
       const obs = currentOf(observations.filter((o) => o.envelope === e.id)), fs = forms.filter((x) => x.envelope === e.id);
@@ -244,7 +249,7 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
     }).reverse();
   }
   async function item(id, lang) {
-    const envelope = (await rows(KEYS.envelopes)).find((e) => e.id === id);
+    const envelope = (await liveEnvelopes()).find((e) => e.id === id);
     if (!envelope) return null;
     const all = (await rows(KEYS.observations)).filter((o) => o.envelope === id);
     const observations = currentOf(all), forms = (await rows(KEYS.forms)).filter((x) => x.envelope === id);
@@ -308,7 +313,7 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
   }
 
   async function upload(req, res, q) {
-    const envelope = (await rows(KEYS.envelopes)).find((e) => e.id === q.get('envelope'));
+    const envelope = (await liveEnvelopes()).find((e) => e.id === q.get('envelope'));
     const kind = q.get('kind');
     const name = path.basename(s(q.get('name'), 120)).replace(/[^\w.\-]+/g, '_');
     const length = Number(req.headers['content-length']);
@@ -333,7 +338,7 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
     const q = new URL(req.url, 'http://x').searchParams;
     const route = pathname.slice('/api/gather/'.length);
     if (route === 'enums' && req.method === 'GET') return sendJson(res, 200, { ...GATHER_ENUMS, basis: BASIS });
-    if (route === 'envelopes' && req.method === 'GET') return sendJson(res, 200, await rows(KEYS.envelopes));
+    if (route === 'envelopes' && req.method === 'GET') return sendJson(res, 200, await liveEnvelopes());
     if (route === 'envelopes' && req.method === 'POST') {
       const b = await readJson(req);
       const env = { id: newId('env'), name: s(b.name, 160), scale: s(b.scale, 40), place: s(b.place, 160), parent: s(b.parent, 80), note: s(b.note, 600),
@@ -345,7 +350,7 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
     }
     if (route === 'envelope' && req.method === 'GET') {
       const id = q.get('id');
-      const envelope = (await rows(KEYS.envelopes)).find((e) => e.id === id);
+      const envelope = (await liveEnvelopes()).find((e) => e.id === id);
       if (!envelope) return sendJson(res, 404, { error: 'Unknown envelope.' });
       const observations = (await rows(KEYS.observations)).filter((o) => o.envelope === id);
       const forms = (await rows(KEYS.forms)).filter((f) => f.envelope === id);
@@ -367,7 +372,7 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
     if (route === 'observations' && req.method === 'POST') {
       const b = await readJson(req, 200000);
       const session = b.session || {};
-      if (!(await rows(KEYS.envelopes)).some((e) => e.id === session.envelope)) return sendJson(res, 404, { error: 'Unknown envelope.' });
+      if (!(await liveEnvelopes()).some((e) => e.id === session.envelope)) return sendJson(res, 404, { error: 'Unknown envelope.' });
       if (session.consent !== true) return sendJson(res, 400, { error: 'Record the speaker\'s consent before saving.' });
       if (session.mode !== 'self' && !s(session.interviewer, 120)) return sendJson(res, 400, { error: 'Add your own name as the interviewer.' });
       const existing = await rows(KEYS.observations);
@@ -379,6 +384,31 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
       return sendJson(res, 201, { saved: cleaned.length });
     }
     if (route === 'upload' && req.method === 'PUT') return upload(req, res, q);
+    if (route === 'thumb' && req.method === 'GET') { // a tile picture made by an admin from the 3D view
+      const id = q.get('id') || '';
+      if (!/^[a-z0-9-]+$/.test(id)) { res.writeHead(400); return res.end(); }
+      return sendFile(res, `gather/thumbs/${id}.jpg`);
+    }
+    if (route.startsWith('admin/')) { // needs the upload token (x-upload-token)
+      if (!isAdmin(req)) return sendJson(res, 403, { error: 'Admin token required.' });
+      if (route === 'admin/check' && req.method === 'GET') return sendJson(res, 200, { ok: true });
+      if (route === 'admin/delete' && req.method === 'POST') {
+        const id = s((await readJson(req)).id, 80);
+        if (!(await liveEnvelopes()).some((e) => e.id === id)) return sendJson(res, 404, { error: 'Unknown envelope.' });
+        await append(KEYS.envelopes, [{ id, deleted: true, deletedAt: new Date().toISOString() }]);
+        return sendJson(res, 200, { deleted: id });
+      }
+      if (route === 'admin/thumb' && req.method === 'PUT') {
+        const id = q.get('id') || '';
+        if (!/^[a-z0-9-]+$/.test(id)) return sendJson(res, 400, { error: 'Bad id.' });
+        const chunks = []; let size = 0;
+        for await (const c of req) { size += c.length; if (size > 2e6) return sendJson(res, 413, { error: 'Picture too large.' }); chunks.push(c); }
+        const body = Buffer.concat(chunks), key = `gather/thumbs/${id}.jpg`;
+        if (s3) await s3.client.send(new s3.PutObjectCommand({ Bucket: s3.bucket, Key: key, Body: body, ContentType: 'image/jpeg' }));
+        else { const file = localPath(key); fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, body); }
+        return sendJson(res, 201, { thumb: id, size });
+      }
+    }
     if (route.startsWith('file/') && req.method === 'GET') {
       const rel = route.slice(5);
       if (!/^env-[a-z0-9-]+\/[\w.\-]+$/.test(rel)) { res.writeHead(400); return res.end(); }

@@ -133,6 +133,11 @@ const S = {
 const params = new URLSearchParams(location.search);
 let LANG = params.get("lang") || stored("gather.lang");
 if (LANG !== "ja" && LANG !== "en") LANG = navigator.language?.startsWith("ja") ? "ja" : "en";
+// Admin: open with ?admin and give the upload token once. It allows removing an item and setting a tile picture.
+const ADMIN = params.has("admin");
+let TOKEN = "";
+if (ADMIN) { try { TOKEN = sessionStorage.getItem("gather.admin") || ""; } catch {} if (!TOKEN) { TOKEN = prompt("Admin token") || ""; try { sessionStorage.setItem("gather.admin", TOKEN); } catch {} } }
+const admin = (path, opts = {}) => fetch(`/api/gather/admin/${path}`, { ...opts, headers: { ...(opts.headers || {}), "x-upload-token": TOKEN } });
 let PUBLIC = params.has("public"), ORIGINAL = false, list = [], data = null, formIndex = 0, splat = null;
 const t = (k) => S[LANG][k];
 const label = (v) => S[LANG].v[v] || String(v || "").replace(/-/g, " ");
@@ -176,7 +181,7 @@ async function showGrid() {
   try {
     const d = await loadDiorama();
     list.unshift({ id: DIORAMA, name: d.envelope.tr.name, place: d.envelope.place, scale: "diorama", audience: "public", featured: true, tr: null,
-      observations: d.observations.length, publicObservations: d.observations.filter((o) => o.protocol?.audience === "public").length, thumb: "", thumbPublic: "", forms: [...new Set(d.forms.map((x) => x.kind))] });
+      observations: d.observations.length, publicObservations: d.observations.filter((o) => o.protocol?.audience === "public").length, thumb: "", thumbPublic: "", thumbUrl: `/api/gather/thumb?id=${DIORAMA}`, forms: [...new Set(d.forms.map((x) => x.kind))] });
   } catch { /* the diorama record is not on this server */ }
   main.innerHTML = "";
   const items = list.filter((e) => !PUBLIC || e.audience === "public" || e.publicObservations);
@@ -185,7 +190,7 @@ async function showGrid() {
   for (const e of items) {
     const tile = el("button", "tile"); tile.dataset.layer = LAYER[e.scale] || "form";
     const pic = el("div", "pic"), thumb = PUBLIC ? e.thumbPublic : e.thumb;
-    if (thumb) { const img = el("img"); img.src = `/api/gather/file/${thumb}`; img.alt = ""; img.loading = "lazy"; pic.append(img); } else pic.textContent = SEAL[e.scale] || "物";
+    if (thumb || e.thumbUrl) { const img = el("img"); img.src = e.thumbUrl || `/api/gather/file/${thumb}`; img.alt = ""; img.loading = "lazy"; img.onerror = () => { img.remove(); pic.textContent = SEAL[e.scale] || "物"; }; pic.append(img); } else pic.textContent = SEAL[e.scale] || "物";
     const body = el("div", "body");
     body.append(el("h3", "pen", nameOf(e)), el("div", "sub", [label(e.scale), placeOf(e)].filter(Boolean).join(" · ")));
     const chips = el("div", "chips");
@@ -231,6 +236,19 @@ function renderItem() {
   const left = el("section", "card"); left.dataset.layer = "form";
   left.append(el("h2", "pen", e.noOriginal ? e.tr.name : nameOf(e)), el("div", "muted", [label(e.scale), e.noOriginal ? e.place : placeOf(e)].filter(Boolean).join(" · ")));
   if (e.featured) { const a = el("a", "btn", `${t("openDiorama")} →`); a.href = `/src/?lang=${LANG}`; a.style.justifySelf = "start"; left.append(a); }
+  if (ADMIN) {
+    const b = el("button", "btn", e.id === DIORAMA ? "Admin: use this 3D view as the tile picture" : "Admin: remove this item"); b.type = "button"; b.style.justifySelf = "start";
+    b.addEventListener("click", async () => {
+      if (e.id === DIORAMA) {
+        if (!splat?.renderer) { alert("Show the 3D capture first, and turn it to the view you want."); return; }
+        splat.want = async (blob) => { const r = await admin(`thumb?id=${DIORAMA}`, { method: "PUT", body: blob }); alert(r.ok ? "Tile picture saved. It can take up to an hour to refresh for people who already loaded it." : (await r.json()).error); };
+      } else if (confirm(`Remove "${nameOf(e)}" from the collection?`)) {
+        const r = await admin("delete", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: e.id }) });
+        if (r.ok) location.hash = ""; else alert((await r.json()).error);
+      }
+    });
+    left.append(b);
+  }
   const stage = el("div", "stage"); left.append(stage);
   if (!forms.length) stage.append(el("div", "msg", t("noForms")));
   else {
@@ -308,7 +326,13 @@ async function startSplat(stage, url) {
     msg.remove();
     const loop = () => { if (mine.stop) return; const w = stage.clientWidth, h = stage.clientHeight;
       if (canvas.width !== Math.round(w * renderer.getPixelRatio())) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
-      controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop); };
+      controls.update(); renderer.render(scene, camera);
+      if (mine.want) { // admin asked for a tile picture: copy this frame before the browser clears it
+        const cb = mine.want; mine.want = null;
+        const c2 = document.createElement("canvas"); c2.width = 800; c2.height = Math.round(800 * canvas.height / canvas.width);
+        c2.getContext("2d").drawImage(canvas, 0, 0, c2.width, c2.height); c2.toBlob(cb, "image/jpeg", 0.85);
+      }
+      requestAnimationFrame(loop); };
     loop();
   } catch (err) { console.error(err); msg.textContent = t("splatFail"); }
 }

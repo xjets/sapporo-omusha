@@ -103,6 +103,10 @@ reality basis) beside what has been told. The flag switches English and Japanese
 language is a cached machine translation, labelled as such, and the speaker's own words are never
 translated. "Public view" shows only what is marked public.
 
+**Admin.** Open `/gather/view/?admin` and give the upload token (`UPLOAD_TOKEN`). An admin can remove an
+item from the collection (a removal is one more line in the record, so nothing is erased and it can be
+undone by hand) and can save the current 3D view of the diorama as its tile picture.
+
 A strip of eight seals shows which layers the envelope has so far. Audio is not kept. Rules and
 storage are in [gather.mjs](gather.mjs); the page is [gather/index.html](gather/index.html).
 Per-person access to family- and community-only entries is not built yet: everyone signed in to

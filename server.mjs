@@ -401,7 +401,7 @@ async function readJson(req, limit = 20000) {
 const sendJson = (res, status, data) => { res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); res.end(JSON.stringify(data)); };
 
 // Gather: the interviewer's input page (/gather/), with its own record apart from the Omusha demo.
-const gather = createGather({ ROOT, s3, sendJson, readJson, mimeOf });
+const gather = createGather({ ROOT, s3, sendJson, readJson, mimeOf, isAdmin: (req) => tokenOk(req) });
 
 async function handleApi(req, res, pathname) {
   if (pathname.startsWith('/api/gather/')) return gather.handle(req, res, pathname);
