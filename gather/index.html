@@ -608,7 +608,7 @@ function wireMic(mic, stateEl, idle, onText) {
       stateEl.textContent = t("micBusy");
       try {
         const blob = new Blob(chunks, { type: r.mimeType || "audio/webm" });
-        const res = await fetch(`/api/listen?lang=${LANG}`, { method: "POST", headers: { "content-type": blob.type }, body: blob });
+        const res = await fetch(`/api/listen?lang=${LANG}&tidy=1`, { method: "POST", headers: { "content-type": blob.type }, body: blob });
         const d = await res.json(); if (!res.ok) throw new Error(d.error || "Could not hear that.");
         if (d.text?.trim()) { stateEl.textContent = t("sayReading"); await onText(d.text.trim()); }
       } catch (err) { toast(err.message); }

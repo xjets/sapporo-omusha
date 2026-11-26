@@ -305,6 +305,34 @@ async function speak(req, res) {
   res.end(audio);
 }
 
+// Tidies a raw transcript so it reads well: fillers and stumbles out, punctuation in, nothing else changed.
+const TIDY_RULES = [
+  'You clean up a raw speech-to-text transcript so it is presentable to read. The speaker is recording their own memories; their words are the record, so change as little as possible.',
+  'Remove: filler sounds and words (uh, um, er, ah, hmm, like, you know, I mean, well, so, when they carry no meaning; Japanese: えー, えーと, えっと, あの, あのー, その, まあ, なんか, こう, when they are only fillers), stutters and immediately repeated words, false starts that the speaker then restarts, and transcription tags such as (laughs) or [noise].',
+  'Fix: punctuation, capital letters, sentence breaks, and obvious spacing. Start a new paragraph only where the subject clearly changes.',
+  'Never: paraphrase, summarise, reorder, translate, add words, correct facts or grammar beyond the above, or change dialect, names, dates, numbers, or expressions of doubt ("I think", "maybe", "around", たぶん, ～かな). If the speaker corrects themself ("in 1955, no, 1956"), keep the correction as said.',
+  'Return only the cleaned text, in the same language, with no comment.',
+].join('\n');
+async function tidy(text, lang) {
+  if (!GEMINI_API_KEY || text.length < 12) return text;
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: TIDY_RULES }] },
+        contents: [{ role: 'user', parts: [{ text }] }],
+        generationConfig: { temperature: 0, maxOutputTokens: 6000, thinkingConfig: { thinkingLevel: 'minimal' } },
+      }),
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!res.ok) { console.error('tidy', res.status, (await res.text()).slice(0, 200)); return text; }
+    const out = ((await res.json()).candidates?.[0]?.content?.parts || []).map((p) => p.text || '').join('').trim();
+    // A tidy-up only trims. Anything much shorter or longer has been rewritten, so the raw words are kept.
+    return out && out.length >= text.length * 0.45 && out.length <= text.length * 1.15 ? out : text;
+  } catch (err) { console.error('tidy', err.message); return text; }
+}
+
 async function listen(req, res) {
   if (!ELEVEN_KEY) return sendJson(res, 503, { error: 'Voice input is not set up on this server (ELEVENLABS_API_KEY is missing).' });
   if (voiceLimited()) return sendJson(res, 429, { error: 'Too many voice requests this minute.' });
@@ -323,7 +351,9 @@ async function listen(req, res) {
     return sendJson(res, 502, { error: 'Could not hear that. Try again or type the question.' });
   }
   const out = await r.json();
-  return sendJson(res, 200, { text: String(out.text || '').trim(), language: out.language_code || '' });
+  const raw = String(out.text || '').trim();
+  const wantTidy = new URL(req.url, 'http://x').searchParams.get('tidy') === '1';
+  return sendJson(res, 200, { text: wantTidy ? await tidy(raw, lang) : raw, raw, language: out.language_code || '' });
 }
 
 async function voiceList(res) {
@@ -404,6 +434,12 @@ async function handleApi(req, res, pathname) {
   }
   if (pathname === '/api/speak' && req.method === 'POST') return speak(req, res);
   if (pathname === '/api/listen' && req.method === 'POST') return listen(req, res);
+  if (pathname === '/api/tidy' && req.method === 'POST') { // the same tidy-up for text that was not recorded here
+    let body;
+    try { body = await readJson(req, 40000); } catch (err) { return sendJson(res, err.status || 400, { error: 'Send JSON' }); }
+    const raw = String(body.text || '').trim().slice(0, 12000);
+    return sendJson(res, 200, { text: await tidy(raw, body.lang), raw });
+  }
   if (pathname === '/api/voices' && req.method === 'GET') return voiceList(res);
   if (pathname === '/api/voice-status' && req.method === 'GET') return sendJson(res, 200, { voice: Boolean(ELEVEN_KEY), talk: Boolean(GEMINI_API_KEY) });
   if (pathname === '/api/talk' && req.method === 'POST') {
