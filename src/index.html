@@ -971,7 +971,16 @@ async function ask(question) {
     const row = elm("div", "row2");
     row.append(elm("span", `chip${data.grounding === "documented" ? "" : " draft"}`, t("grounding")[data.grounding] || data.grounding));
     const say = elm("button", "link", t("replay")); say.type = "button"; say.addEventListener("click", () => speak(data.answer, id, say));
-    row.append(say); pending.append(row);
+    // Pause or resume, and stop, whatever answer is playing
+    const pause = elm("button", "link", LANG === "ja" ? "⏯ 一時停止" : "⏯ Pause"); pause.type = "button";
+    pause.addEventListener("click", () => {
+      if (voice.server) { if (!voice.audio.src || voice.audio.ended) return; if (voice.audio.paused) voice.audio.play().catch(() => {}); else voice.audio.pause(); }
+      else if ("speechSynthesis" in window) { if (speechSynthesis.paused) speechSynthesis.resume(); else speechSynthesis.pause(); }
+    });
+    const stop = elm("button", "link", LANG === "ja" ? "⏹ 停止" : "⏹ Stop"); stop.type = "button";
+    stop.addEventListener("click", () => { stopSpeaking(); try { voice.audio.currentTime = 0; } catch { /* nothing loaded */ } });
+    pause.style.marginLeft = stop.style.marginLeft = "10px";
+    row.append(say, pause, stop); pending.append(row);
     if (voice.server && voice.auto) speak(data.answer, id, say);
     const cited = (data.cites || []).map((c) => Env.state.all.find((o) => o.id === c)).filter(Boolean);
     if (cited.length) {
