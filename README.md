@@ -20,7 +20,7 @@ Hack Hokkaido Build Week, November 2026.
 | Close-up 3D model per figure | Working (7 elder figures) |
 | Character sheets (12 figures) | Drafts, not yet sourced |
 | Talk: ask a figure, answers only from the observation record | Working (Gemini; voice input and read-aloud in the browser) |
-| Gather: record what people know, by voice or text, in English or Japanese ([below](#gather-the-input-side)) | Working (ElevenLabs Scribe and voice, Gemini sorting); tested with typed and simulated speech more than with live microphones |
+| Gather: record what people know, by voice or text, in English or Japanese ([below](#gather-the-input-side)) | Working (ElevenLabs Scribe and voice, Gemini sorting); run end to end by voice on an Android phone |
 | Collection viewer: every gathered item and the diorama in one grid, switchable versions and languages | Working (`/gather/view/`); translations are machine-made and unreviewed |
 | Per-person access to family- and community-only entries | Not built: one shared password for the whole site |
 | Preference dataset and held-out eval | Generated, not yet reviewed ([training/](training/)) |
