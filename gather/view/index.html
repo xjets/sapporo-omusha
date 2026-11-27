@@ -196,7 +196,7 @@ async function showGrid() {
     const tile = el("button", "tile"); tile.dataset.layer = LAYER[e.scale] || "form";
     const pic = el("div", "pic"), thumb = PUBLIC ? e.thumbPublic : e.thumb;
     e.thumbUrl = SHOW.thumbs[e.id] ? `/api/gather/thumb?id=${e.id}&v=${SHOW.thumbs[e.id]}` : "";
-    if (thumb || e.thumbUrl) { const img = el("img"); img.src = e.thumbUrl || `/api/gather/file/${thumb}`; img.alt = ""; img.loading = "lazy"; img.onerror = () => { img.remove(); pic.textContent = SEAL[e.scale] || "物"; }; pic.append(img); } else pic.textContent = SEAL[e.scale] || "物";
+    if (thumb || e.thumbUrl) { const img = el("img"); img.src = e.thumbUrl || `/api/gather/tile/${thumb}`; img.alt = ""; img.loading = "lazy"; img.onerror = () => { img.remove(); pic.textContent = SEAL[e.scale] || "物"; }; pic.append(img); } else pic.textContent = SEAL[e.scale] || "物";
     const body = el("div", "body");
     body.append(el("h3", "pen", nameOf(e)), el("div", "sub", [label(e.scale), placeOf(e)].filter(Boolean).join(" · ")));
     const chips = el("div", "chips");

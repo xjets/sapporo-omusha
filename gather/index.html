@@ -811,13 +811,13 @@ function renderTiles() {
   }
 }
 // Photos are resized to 2048 px JPEG in the browser, which also drops location and camera data.
-async function shrink(file) {
+async function shrink(file, edge = 2048, quality = 0.86) {
   if (!file.type.startsWith("image/")) return file;
   try {
-    const bmp = await createImageBitmap(file); const k = Math.min(1, 2048 / Math.max(bmp.width, bmp.height));
+    const bmp = await createImageBitmap(file); const k = Math.min(1, edge / Math.max(bmp.width, bmp.height));
     const c = Object.assign(document.createElement("canvas"), { width: Math.round(bmp.width * k), height: Math.round(bmp.height * k) });
     c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-    const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.86));
+    const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", quality));
     return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
   } catch { return file; }
 }
@@ -826,7 +826,12 @@ async function uploadFiles(kind, files) {
     const file = kind === "photo" ? await shrink(raw) : raw;
     $("upState").textContent = t("uploading")(file.name);
     const q = new URLSearchParams({ envelope: env.id, kind, name: file.name, caption: $("fCaption").value, date: $("fDate").value, by: who(), audience: $("sAudience").value });
-    try { forms.push(await api(`upload?${q}`, { method: "PUT", headers: { "content-type": file.type || "application/octet-stream" }, body: file })); $("upState").textContent = t("uploaded"); }
+    try {
+      const form = await api(`upload?${q}`, { method: "PUT", headers: { "content-type": file.type || "application/octet-stream" }, body: file });
+      forms.push(form); $("upState").textContent = t("uploaded");
+      // a small copy for the collection tiles; if it fails the tile simply shows the full photo
+      if (kind === "photo") shrink(file, 800, 0.8).then((small) => fetch(`/api/gather/tile/${form.file}`, { method: "PUT", headers: { "content-type": "image/jpeg" }, body: small })).catch(() => {});
+    }
     catch (err) { $("upState").textContent = err.message; }
     renderForms(); renderCover();
   }

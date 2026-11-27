@@ -428,6 +428,27 @@ export function createGather({ ROOT, s3, sendJson, readJson, mimeOf, isAdmin = (
         return sendJson(res, 201, { thumb: id, size, at });
       }
     }
+    // Small copies of photographs for the collection tiles. The browser makes one when a photo is uploaded (there is no image
+    // library on the server); a photo without one is served at full size instead.
+    if (route.startsWith('tile/') && (req.method === 'GET' || req.method === 'PUT')) {
+      const rel = route.slice(5);
+      if (!/^env-[a-z0-9-]+\/[\w.\-]+$/.test(rel)) { res.writeHead(400); return res.end(); }
+      const key = `gather/tiles/${rel}`;
+      if (req.method === 'GET') {
+        let has = false;
+        if (!s3) has = fs.existsSync(localPath(key));
+        else { try { await s3.client.send(new s3.HeadObjectCommand({ Bucket: s3.bucket, Key: key })); has = true; } catch { /* no small copy yet */ } }
+        return sendFile(res, has ? key : `gather/files/${rel}`, has ? 'private, max-age=86400' : 'private, max-age=300');
+      }
+      if (!(await rows(KEYS.forms)).some((x) => x.kind === 'photo' && x.file === rel)) return sendJson(res, 404, { error: 'Unknown photograph.' });
+      const chunks = []; let size = 0;
+      for await (const c of req) { size += c.length; if (size > 400_000) return sendJson(res, 413, { error: 'Tile copy too large.' }); chunks.push(c); }
+      const body = Buffer.concat(chunks);
+      if (body[0] !== 0xff || body[1] !== 0xd8) return sendJson(res, 400, { error: 'Tile copy must be a JPEG.' });
+      if (s3) await s3.client.send(new s3.PutObjectCommand({ Bucket: s3.bucket, Key: key, Body: body, ContentType: 'image/jpeg' }));
+      else { const f = localPath(key); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, body); }
+      return sendJson(res, 201, { tile: rel, size });
+    }
     if (route.startsWith('file/') && req.method === 'GET') {
       const rel = route.slice(5);
       if (!/^env-[a-z0-9-]+\/[\w.\-]+$/.test(rel)) { res.writeHead(400); return res.end(); }

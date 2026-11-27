@@ -44,14 +44,14 @@ function authorised(req) {
 // ---- Bucket (optional)
 let s3 = null;
 if (process.env.BUCKET) {
-  const { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command } = await import('@aws-sdk/client-s3');
+  const { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command, HeadObjectCommand } = await import('@aws-sdk/client-s3');
   const client = new S3Client({
     endpoint: process.env.ENDPOINT,
     region: process.env.REGION || 'auto',
     forcePathStyle: process.env.BUCKET_PATH_STYLE === 'true',
     credentials: { accessKeyId: process.env.ACCESS_KEY_ID, secretAccessKey: process.env.SECRET_ACCESS_KEY },
   });
-  s3 = { client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command, bucket: process.env.BUCKET };
+  s3 = { client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command, HeadObjectCommand, bucket: process.env.BUCKET };
 }
 
 // Uploads and deletes of assets need the site password AND this token (x-upload-token header).
